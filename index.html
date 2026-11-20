@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Twix-opener — интерактивная 3D-модель привода</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#1d2830;--muted:#5c6b76;--panel:rgba(251,252,253,.84);--line:rgba(29,40,48,.14);--gold:#c98a14;--red:#c43a2b;--bg1:#e6eaed;--bg2:#bcc7cf}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{font:400 14px/1.4 Manrope,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink);background:radial-gradient(120% 90% at 50% 20%,var(--bg1),var(--bg2));overflow:hidden;font-variant-numeric:tabular-nums}
+canvas#view{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+.card{background:var(--panel);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+header{position:fixed;left:20px;top:18px;max-width:340px}
+header h1{margin:0;font-size:22px;font-weight:800;letter-spacing:-.01em}
+header p{margin:4px 0 0;color:var(--muted)}
+#hud{position:fixed;left:20px;bottom:20px;width:316px}
+#hud .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px}
+.m b{display:block;font-size:24px;font-weight:800;line-height:1.1}
+.m span{color:var(--muted);font-size:12px}
+canvas#scope{width:100%;height:84px;display:block;margin-top:12px;border-top:1px solid var(--line);padding-top:8px}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--muted);margin-top:2px}
+.legend i{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:5px}
+#ctl{position:fixed;right:20px;bottom:20px;width:304px;display:flex;flex-direction:column;gap:14px}
+.power{display:flex;align-items:center;gap:14px}
+#sw{all:unset;cursor:pointer;width:72px;height:38px;border-radius:19px;background:#9aa6ae;position:relative;transition:background .25s;flex:none}
+#sw::after{content:"";position:absolute;left:4px;top:4px;width:30px;height:30px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.35);transition:transform .25s cubic-bezier(.3,1.4,.5,1)}
+#sw[aria-checked=true]{background:var(--red)}
+#sw[aria-checked=true]::after{transform:translateX(34px)}
+#sw:focus-visible,button.t:focus-visible,input:focus-visible{outline:3px solid #1d6fd1;outline-offset:2px}
+.power .tx strong{display:block;font-size:16px}
+.power .tx span{color:var(--muted);font-size:12.5px}
+#status.warn{color:var(--red);font-weight:600}
+.row{display:flex;justify-content:space-between;align-items:baseline;font-size:13px}
+.row output{font-weight:600}
+input[type=range]{width:100%;accent-color:var(--gold);margin:4px 0 10px}
+.btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+button.t{all:unset;box-sizing:border-box;cursor:pointer;text-align:center;padding:8px 6px;border-radius:9px;border:1px solid var(--line);background:rgba(255,255,255,.6);font-weight:600;font-size:13px;transition:background .15s}
+button.t:hover{background:#fff}
+button.t[aria-pressed=true]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.hint{color:var(--muted);font-size:12px;margin:0}
+#tip{position:fixed;pointer-events:none;padding:8px 11px;border-radius:9px;background:var(--ink);color:#fff;font-size:12.5px;max-width:230px;opacity:0;transition:opacity .12s;z-index:5}
+#tip b{display:block;font-size:13.5px}
+#load{position:fixed;inset:0;display:grid;place-items:center;font-weight:600;color:var(--muted);background:var(--bg1);z-index:9;transition:opacity .4s}
+@media (max-width:820px){
+ header{left:14px;top:12px} header h1{font-size:18px} header p{display:none}
+ #hud{left:12px;right:12px;bottom:auto;top:52px;width:auto;padding:10px 12px}
+ #hud .grid{grid-template-columns:repeat(4,1fr);gap:6px} .m b{font-size:17px} .m span{font-size:10.5px}
+ canvas#scope,.legend{display:none}
+ #ctl{left:12px;right:12px;bottom:12px;width:auto;padding:12px}
+}
+@media (prefers-reduced-motion:reduce){#sw,#sw::after{transition:none}}
+</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+<script src="model-data.js"></script>
+</head>
+<body>
+<canvas id="view"></canvas>
+<header><h1>Twix-opener</h1><p>Привод правой части: двигатель, кривошип, ползун и ролики. Вращайте сцену мышью, колесо — масштаб.</p></header>
+
+<section id="hud" class="card" aria-label="Показатели">
+  <div class="grid">
+    <div class="m"><b id="vRpm">0</b><span>Обороты вала, об/мин</span></div>
+    <div class="m"><b id="vZ">0.0</b><span>Ход ползуна, мм</span></div>
+    <div class="m"><b id="vTau">0.000</b><span>Момент двигателя, Н·м</span></div>
+    <div class="m"><b id="vI">0.00</b><span>Ток, А</span></div>
+  </div>
+  <canvas id="scope"></canvas>
+  <div class="legend"><span><i style="background:#c98a14"></i>ход ползуна</span><span><i style="background:#c43a2b"></i>обороты</span></div>
+</section>
+
+<section id="ctl" class="card" aria-label="Управление">
+  <div class="power">
+    <button id="sw" role="switch" aria-checked="false" aria-label="Питание двигателя"></button>
+    <div class="tx"><strong id="pw">Выключено</strong><span id="status">Пробел — включить</span></div>
+  </div>
+  <div>
+    <div class="row"><label for="rV">Напряжение</label><output id="oV">100 %</output></div>
+    <input id="rV" type="range" min="20" max="100" value="100">
+    <div class="row"><label for="rK">Жёсткость пружины</label><output id="oK">150 Н/м</output></div>
+    <input id="rK" type="range" min="0" max="1000" step="10" value="150">
+    <p class="hint">Если пружина окажется сильнее двигателя, вал заклинит.</p>
+  </div>
+  <div class="seg" role="group" aria-label="Скорость времени">
+    <button class="t" data-ts="1" aria-pressed="true">Реальное</button>
+    <button class="t" data-ts="0.25" aria-pressed="false">Замедл. ¼</button>
+    <button class="t" data-ts="0.05" aria-pressed="false">Замедл. 1/20</button>
+  </div>
+  <div class="btns">
+    <button class="t" id="bEx" aria-pressed="false">Разнести детали</button>
+    <button class="t" id="bWf" aria-pressed="false">Каркас</button>
+    <button class="t" id="bSnd" aria-pressed="false">Звук</button>
+    <button class="t" id="bRot" aria-pressed="false">Автовращение</button>
+  </div>
+  <button class="t" id="bCam">Сбросить камеру</button>
+</section>
+
+<div id="tip"></div>
+<div id="load">Загрузка модели…</div>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+/* ============ ФИЗИКА (СИ: метры, кг, секунды, Н·м) ============ */
+/*PHYS*/
+const P = {
+  R: 0.020,      // радиус кривошипа, м (по отверстию в модели)
+  J: 0.0020,     // момент инерции вала, ротора и кривошипа, кг·м²
+  tauS: 0.18,    // пусковой момент двигателя, Н·м
+  w0: 20,        // холостая угловая скорость при 100 % напряжения, рад/с (~190 об/мин)
+  b: 0.0004,     // вязкое трение вала, Н·м·с
+  tauC: 0.004,   // сухое трение подшипников, Н·м
+  m: 0.15,       // масса ползуна со всем, что на нём, кг
+  k: 150,        // жёсткость возвратной пружины, Н/м
+  c: 2.0,        // демпфирование на ползуне, Н·с/м
+  Fc: 0.8,       // сухое трение направляющих, Н
+  g: 9.81,
+  tauE: 0.04,    // электрическая постоянная времени, с
+  Imax: 3.0,     // пусковой ток, А
+  Idle: 0.15,    // ток холостого хода, А
+  roll: 1.5,     // передаточное число вала на ролики (принято)
+  gear: -1.2     // передаточное число вала на шестерню (принято)
+};
+const S = { th: 0, w: 0, vin: 0, on: false, V: 1, tau: 0, tOn: 0, stallT: 0 };
+
+// Одна ось θ (кривошип). Ползун: z = R·sinθ (кулисный механизм).
+// Уравнение Лагранжа: (J + m·z'²)·θ'' = τдв − τтр + Fz·z' + m·R²·sinθ·cosθ·θ'²
+function stepPhysics(s, dt) {
+  s.vin += ((s.on ? s.V : 0) - s.vin) * (1 - Math.exp(-dt / P.tauE));
+  const sn = Math.sin(s.th), cs = Math.cos(s.th);
+  const z = P.R * sn, dz = P.R * cs, zd = dz * s.w;
+  const Fz = -P.k * z - P.c * zd - P.Fc * Math.tanh(zd / 0.01) - P.m * P.g;
+  const tauM = s.on ? P.tauS * (s.vin - s.w / P.w0) : 0;   // момент падает с ростом противо-ЭДС
+  const tauF = P.b * s.w + P.tauC * Math.tanh(s.w / 0.3);
+  const M = P.J + P.m * dz * dz;
+  const a = (tauM - tauF + Fz * dz + P.m * P.R * P.R * cs * sn * s.w * s.w) / M;
+  s.w += a * dt;
+  s.th += s.w * dt;
+  s.tau = tauM;
+  s.z = z;
+  s.on ? (s.tOn += dt) : (s.tOn = 0);
+  s.stallT = (s.on && Math.abs(s.w) < 0.6 && s.tOn > 0.4) ? s.stallT + dt : 0;
+}
+/*ENDPHYS*/
+
+/* ============ СЦЕНА ============ */
+const canvas = document.getElementById('view');
+let renderer;
+try { renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true }); }
+catch (e) { document.getElementById('load').textContent = 'WebGL недоступен в этом браузере.'; throw e; }
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+
+const scene = new THREE.Scene();
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 500);
+const CAM0 = new THREE.Vector3(14, 9, 18);
+camera.position.copy(CAM0);
+const controls = new OrbitControls(camera, canvas);
+controls.enableDamping = true; controls.minDistance = 8; controls.maxDistance = 80;
+controls.maxPolarAngle = Math.PI * 0.495; controls.autoRotateSpeed = 1.2;
+
+const sun = new THREE.DirectionalLight(0xffffff, 1.6);
+sun.position.set(12, 24, 14); sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048); sun.shadow.bias = -0.0006;
+Object.assign(sun.shadow.camera, { left: -18, right: 18, top: 18, bottom: -18, near: 1, far: 70 });
+scene.add(sun);
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(120, 120), new THREE.ShadowMaterial({ opacity: 0.22 }));
+floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor);
+const grid = new THREE.GridHelper(60, 60, 0x7d8b95, 0x9aa6ae);
+grid.material.transparent = true; grid.material.opacity = 0.35; scene.add(grid);
+
+/* ============ МОДЕЛЬ ============ */
+// CAD: Z вверх, мм. Группа cad переводит в Y-вверх и сантиметры.
+const cad = new THREE.Group();
+cad.rotation.x = -Math.PI / 2; cad.scale.setScalar(0.1); cad.position.set(-2.7, 0.8, -0.5);
+scene.add(cad);
+const slider = new THREE.Group(); cad.add(slider);
+
+const MODEL = window.TWIX_MODEL;
+const bin = Uint8Array.from(atob(MODEL.bin), c => c.charCodeAt(0)).buffer;
+const WHEELS = [9, 12, 15, 18];
+const parts = [], wheels = [];
+let crank, gear;
+
+function makeGeometry(m) {
+  const q = new Uint16Array(bin, m.po, m.nv * 3), pos = new Float32Array(m.nv * 3);
+  for (let k = 0; k < pos.length; k++) pos[k] = m.lo[k % 3] + q[k] * m.step;
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  g.setIndex(new THREE.BufferAttribute(new Uint16Array(bin, m.io, m.ni), 1));
+  g.computeVertexNormals();
+  return g;
+}
+
+function describe(m) {
+  const i = m.i, mv = 'Движется';
+  const D = {
+    0: { col: 0x6f8798, d: 'Неподвижный корпус с фланцем. Несёт на себе ролики.' },
+    1: { col: 0x8d9da8, off: [-50, 0, 0], d: 'Неподвижный кронштейн двигателя.' },
+    2: { col: 0x39464f, off: [-30, 0, 14], d: 'Неподвижный хомут на валу.' },
+    3: { col: 0xc9ced2, off: [-18, 0, 30], metal: 1, d: 'Пружина у двигателя, неподвижна.' },
+    4: { col: 0xd9a22b, off: [-14, 0, 0], d: mv + ': вращается с валом, радиус отверстия 20 мм.', pivot: [0, 0, 0] },
+    5: { col: 0xd9a22b, off: [0, 30, 0], par: slider, d: mv + ': ходит вверх-вниз за кривошипом (z = R·sinθ).' },
+    6: { col: 0xc9ced2, off: [0, 48, 18], par: slider, metal: 1, d: mv + ': пружина едет вместе с ползуном.' },
+    7: { col: 0xe6b84a, off: [0, 30, -26], par: slider, pivot: [m.center[0], m.center[1], 0], d: mv + ': шестерня на ползуне, вращается от вала (передача принята).' },
+    8: { col: 0xd9a22b, off: [10, 30, -42], par: slider, d: mv + ': звено едет вместе с ползуном.' }
+  };
+  if (D[i]) return D[i];
+  if (WHEELS.includes(i)) return { col: 0xa8332b, wheel: 1, off: [0, -34, 0], pivot: [0, m.center[1], m.center[2]], d: mv + ': ролик, вращается от вала (передача принята).' };
+  return { col: 0x4f5e69, block: 1, d: 'Неподвижная опора ролика.' };
+}
+
+for (const m of MODEL.parts) {
+  const d = describe(m);
+  const mat = new THREE.MeshStandardMaterial({ color: d.col, metalness: d.metal ? 0.9 : 0.35, roughness: d.metal ? 0.28 : 0.5, side: THREE.DoubleSide });
+  const mesh = new THREE.Mesh(makeGeometry(m), mat);
+  mesh.castShadow = mesh.receiveShadow = true;
+  const wrap = new THREE.Group(), pivot = new THREE.Group();
+  if (d.pivot) { pivot.position.set(...d.pivot); mesh.position.set(-d.pivot[0], -d.pivot[1], -d.pivot[2]); }
+  pivot.add(mesh); wrap.add(pivot); (d.par || cad).add(wrap);
+  const rec = { m, d, mesh, wrap, pivot, off: d.off ? d.off.slice() : [0, 0, 0] };
+  parts.push(rec);
+  if (m.i === 4) crank = rec;
+  if (m.i === 7) gear = rec;
+  if (d.wheel) wheels.push({ rec, dir: m.center[2] > 0 ? 1 : -1 });
+}
+// разнос опор роликов: от своего ролика наружу
+for (const r of parts) if (r.d.block) {
+  const w = wheels.map(x => x.rec).reduce((a, b) => Math.hypot(a.m.center[0] - r.m.center[0], a.m.center[2] - r.m.center[2]) < Math.hypot(b.m.center[0] - r.m.center[0], b.m.center[2] - r.m.center[2]) ? a : b);
+  r.off = [Math.sign(r.m.center[0] - w.m.center[0]) * 14, -34, Math.sign(r.m.center[2]) * 16];
+  r.wrapRoller = w;
+}
+document.getElementById('load').style.opacity = 0;
+setTimeout(() => document.getElementById('load').remove(), 450);
+
+/* ============ УПРАВЛЕНИЕ ============ */
+const $ = id => document.getElementById(id);
+const sw = $('sw'), reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+let timeScale = 1, exTarget = 0, ex = 0, soundOn = false, au = null;
+
+function setPower(on) {
+  S.on = on; sw.setAttribute('aria-checked', on);
+  if (on && soundOn) audioInit();
+}
+sw.addEventListener('click', () => setPower(!S.on));
+addEventListener('keydown', e => {
+  if (e.code === 'Space' && !e.target.closest('button,input')) { e.preventDefault(); setPower(!S.on); }
+});
+const bind = (id, fn) => { const el = $(id); el.addEventListener('click', () => { const v = el.getAttribute('aria-pressed') !== 'true'; el.setAttribute('aria-pressed', v); fn(v); }); };
+bind('bEx', v => { exTarget = v ? 1 : 0; if (reduce) ex = exTarget; });
+bind('bWf', v => parts.forEach(p => p.mesh.material.wireframe = v));
+bind('bSnd', v => { soundOn = v; if (v) audioInit(); });
+bind('bRot', v => controls.autoRotate = v && !reduce);
+$('bCam').addEventListener('click', () => { camera.position.copy(CAM0); controls.target.set(0, 0, 0); controls.update(); });
+$('rV').addEventListener('input', e => { S.V = e.target.value / 100; $('oV').textContent = e.target.value + ' %'; });
+$('rK').addEventListener('input', e => { P.k = +e.target.value; $('oK').textContent = e.target.value + ' Н/м'; });
+document.querySelectorAll('[data-ts]').forEach(b => b.addEventListener('click', () => {
+  timeScale = +b.dataset.ts;
+  document.querySelectorAll('[data-ts]').forEach(x => x.setAttribute('aria-pressed', x === b));
+}));
+
+function audioInit() {
+  if (!au) {
+    const c = new (window.AudioContext || window.webkitAudioContext)();
+    const o = c.createOscillator(), f = c.createBiquadFilter(), g = c.createGain();
+    o.type = 'sawtooth'; f.type = 'lowpass'; f.frequency.value = 600; g.gain.value = 0;
+    o.connect(f); f.connect(g); g.connect(c.destination); o.start(); au = { c, o, g };
+  }
+  au.c.resume();
+}
+
+/* подсказка при наведении */
+const ray = new THREE.Raycaster(), ptr = new THREE.Vector2(), tip = $('tip');
+let hover = null, ptrDirty = false, px = 0, py = 0;
+canvas.addEventListener('pointermove', e => { px = e.clientX; py = e.clientY; ptrDirty = true; });
+canvas.addEventListener('pointerleave', () => { px = py = -1; ptrDirty = true; });
+function pick() {
+  ptrDirty = false;
+  let hit = null;
+  if (px >= 0) {
+    ptr.set(px / innerWidth * 2 - 1, -(py / innerHeight) * 2 + 1);
+    ray.setFromCamera(ptr, camera);
+    const h = ray.intersectObjects(parts.map(p => p.mesh), false)[0];
+    if (h) hit = parts.find(p => p.mesh === h.object);
+  }
+  if (hit !== hover) {
+    if (hover) hover.mesh.material.emissive.setHex(0);
+    hover = hit;
+    if (hover) hover.mesh.material.emissive.setHex(0x3a2a08);
+  }
+  if (hover) {
+    tip.innerHTML = '<b>' + hover.m.name + '</b>' + hover.d.d + ' Объём ≈ ' + hover.m.vol.toFixed(1) + ' см³.';
+    tip.style.left = Math.min(px + 16, innerWidth - 250) + 'px'; tip.style.top = (py + 16) + 'px'; tip.style.opacity = 1;
+  } else tip.style.opacity = 0;
+}
+
+/* ============ ЦИКЛ ============ */
+const sc = $('scope'), sctx = sc.getContext('2d'), N = 240, hz = [], hr = [];
+function drawScope() {
+  const dpr = Math.min(devicePixelRatio, 2), w = sc.clientWidth, h = sc.clientHeight;
+  if (!w) return;
+  if (sc.width !== w * dpr) { sc.width = w * dpr; sc.height = h * dpr; }
+  sctx.setTransform(dpr, 0, 0, dpr, 0, 0); sctx.clearRect(0, 0, w, h);
+  sctx.strokeStyle = 'rgba(29,40,48,.18)'; sctx.beginPath(); sctx.moveTo(0, h / 2); sctx.lineTo(w, h / 2); sctx.stroke();
+  const line = (arr, col, f) => { sctx.strokeStyle = col; sctx.lineWidth = 1.8; sctx.beginPath();
+    arr.forEach((v, i) => { const x = i / (N - 1) * w, y = h - 6 - f(v) * (h - 12); i ? sctx.lineTo(x, y) : sctx.moveTo(x, y); }); sctx.stroke(); };
+  line(hz, '#c98a14', v => (v / (P.R * 1000) + 1) / 2);
+  line(hr, '#c43a2b', v => Math.min(1, Math.max(0, v / 220)));
+}
+const rpmOf = () => S.w * 60 / (2 * Math.PI);
+let last = performance.now(), acc = 0, hudT = 0;
+function frame(t) {
+  const dt = Math.min(0.05, (t - last) / 1000); last = t;
+  acc += dt * timeScale;
+  const H = 1 / 1000;
+  while (acc >= H) { stepPhysics(S, H); acc -= H; }
+
+  crank.pivot.rotation.x = S.th;
+  slider.position.z = P.R * 1000 * Math.sin(S.th);
+  gear.pivot.rotation.z = P.gear * S.th;
+  for (const w of wheels) w.rec.pivot.rotation.x = w.dir * P.roll * S.th;
+
+  if (!reduce) ex += (exTarget - ex) * (1 - Math.exp(-dt * 6));
+  if (Math.abs(exTarget - ex) < 0.001) ex = exTarget;
+  for (const p of parts) p.wrap.position.set(p.off[0] * ex, p.off[1] * ex, p.off[2] * ex);
+  floor.position.y = grid.position.y = -5.3 - 4.8 * ex;
+
+  hz.push(S.z * 1000); hr.push(Math.abs(rpmOf())); if (hz.length > N) { hz.shift(); hr.shift(); }
+  if ((hudT += dt) > 0.1) {
+    hudT = 0;
+    const rpm = rpmOf(), I = S.on ? P.Imax * Math.abs(S.tau) / P.tauS + P.Idle : 0;
+    $('vRpm').textContent = Math.abs(rpm).toFixed(0);
+    $('vZ').textContent = (S.z * 1000).toFixed(1);
+    $('vTau').textContent = S.tau.toFixed(3);
+    $('vI').textContent = I.toFixed(2);
+    const stall = S.stallT > 0.5, st = $('status');
+    $('pw').textContent = S.on ? 'Включено' : 'Выключено';
+    st.classList.toggle('warn', stall);
+    st.textContent = stall ? 'Перегрузка: вал заклинило' : S.on ? (S.tOn < 0.8 ? 'Разгон' : 'Рабочий режим') : (Math.abs(rpm) > 2 ? 'Выбег по инерции' : 'Пробел — включить');
+  }
+  if (au && soundOn) {
+    au.o.frequency.setTargetAtTime(30 + Math.abs(rpmOf()) * 0.9, au.c.currentTime, 0.05);
+    au.g.gain.setTargetAtTime(Math.min(0.05, Math.abs(rpmOf()) / 4000), au.c.currentTime, 0.08);
+  } else if (au) au.g.gain.setTargetAtTime(0, au.c.currentTime, 0.05);
+
+  if (ptrDirty) pick();
+  drawScope();
+  controls.update();
+  renderer.render(scene, camera);
+  requestAnimationFrame(frame);
+}
+function resize() {
+  const w = innerWidth, h = innerHeight;
+  renderer.setSize(w, h, false); camera.aspect = w / h;
+  camera.fov = w < h ? 50 : 35; camera.updateProjectionMatrix();
+}
+addEventListener('resize', resize); resize();
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
