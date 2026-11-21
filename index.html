@@ -3,195 +3,267 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Twix-opener — интерактивная 3D-модель привода</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
+<title>Twix-opener — Сборка правая часть</title>
 <style>
-:root{--ink:#1d2830;--muted:#5c6b76;--panel:rgba(251,252,253,.84);--line:rgba(29,40,48,.14);--gold:#c98a14;--red:#c43a2b;--bg1:#e6eaed;--bg2:#bcc7cf}
+:root{--bg:#f0f0f0;--pane:#f8f8f8;--h1:#f4f7fc;--h2:#d3e0f2;--bd:#8fa5c3;--ln:#c9d2de;--tx:#1b1b1b;--mut:#5b6572;--sel:#cfe3fb;--ok:#1d8a3c;--bad:#c4281c}
 *{box-sizing:border-box}
 html,body{height:100%;margin:0}
-body{font:400 14px/1.4 Manrope,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink);background:radial-gradient(120% 90% at 50% 20%,var(--bg1),var(--bg2));overflow:hidden;font-variant-numeric:tabular-nums}
-canvas#view{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
-.card{background:var(--panel);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
-header{position:fixed;left:20px;top:18px;max-width:340px}
-header h1{margin:0;font-size:22px;font-weight:800;letter-spacing:-.01em}
-header p{margin:4px 0 0;color:var(--muted)}
-#hud{position:fixed;left:20px;bottom:20px;width:316px}
-#hud .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px}
-.m b{display:block;font-size:24px;font-weight:800;line-height:1.1}
-.m span{color:var(--muted);font-size:12px}
-canvas#scope{width:100%;height:84px;display:block;margin-top:12px;border-top:1px solid var(--line);padding-top:8px}
-.legend{display:flex;gap:14px;font-size:12px;color:var(--muted);margin-top:2px}
-.legend i{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:5px}
-#ctl{position:fixed;right:20px;bottom:20px;width:304px;display:flex;flex-direction:column;gap:14px}
-.power{display:flex;align-items:center;gap:14px}
-#sw{all:unset;cursor:pointer;width:72px;height:38px;border-radius:19px;background:#9aa6ae;position:relative;transition:background .25s;flex:none}
-#sw::after{content:"";position:absolute;left:4px;top:4px;width:30px;height:30px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.35);transition:transform .25s cubic-bezier(.3,1.4,.5,1)}
-#sw[aria-checked=true]{background:var(--red)}
-#sw[aria-checked=true]::after{transform:translateX(34px)}
-#sw:focus-visible,button.t:focus-visible,input:focus-visible{outline:3px solid #1d6fd1;outline-offset:2px}
-.power .tx strong{display:block;font-size:16px}
-.power .tx span{color:var(--muted);font-size:12.5px}
-#status.warn{color:var(--red);font-weight:600}
-.row{display:flex;justify-content:space-between;align-items:baseline;font-size:13px}
-.row output{font-weight:600}
-input[type=range]{width:100%;accent-color:var(--gold);margin:4px 0 10px}
-.btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-button.t{all:unset;box-sizing:border-box;cursor:pointer;text-align:center;padding:8px 6px;border-radius:9px;border:1px solid var(--line);background:rgba(255,255,255,.6);font-weight:600;font-size:13px;transition:background .15s}
-button.t:hover{background:#fff}
-button.t[aria-pressed=true]{background:var(--ink);color:#fff;border-color:var(--ink)}
-.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
-.hint{color:var(--muted);font-size:12px;margin:0}
-#tip{position:fixed;pointer-events:none;padding:8px 11px;border-radius:9px;background:var(--ink);color:#fff;font-size:12.5px;max-width:230px;opacity:0;transition:opacity .12s;z-index:5}
-#tip b{display:block;font-size:13.5px}
-#load{position:fixed;inset:0;display:grid;place-items:center;font-weight:600;color:var(--muted);background:var(--bg1);z-index:9;transition:opacity .4s}
-@media (max-width:820px){
- header{left:14px;top:12px} header h1{font-size:18px} header p{display:none}
- #hud{left:12px;right:12px;bottom:auto;top:52px;width:auto;padding:10px 12px}
- #hud .grid{grid-template-columns:repeat(4,1fr);gap:6px} .m b{font-size:17px} .m span{font-size:10.5px}
- canvas#scope,.legend{display:none}
- #ctl{left:12px;right:12px;bottom:12px;width:auto;padding:12px}
+body{font:12px/1.35 "Segoe UI",Tahoma,Arial,sans-serif;color:var(--tx);background:var(--bg);overflow:hidden}
+#app{display:grid;grid-template-rows:auto auto 1fr auto;height:100%}
+#titlebar{background:linear-gradient(#fdfefe,#dfe8f4);border-bottom:1px solid var(--bd);padding:4px 10px;font-weight:600}
+#titlebar span{font-weight:400;color:var(--mut);margin-left:8px}
+#toolbar{display:flex;flex-wrap:wrap;gap:3px 4px;padding:4px 6px;background:var(--bg);border-bottom:1px solid var(--ln);align-items:center}
+.sep{width:1px;height:20px;background:var(--ln);margin:0 4px}
+button,select{font:inherit;color:var(--tx)}
+.tb{padding:3px 8px;border:1px solid transparent;border-radius:3px;background:transparent;cursor:pointer}
+.tb:hover{background:#e3edf9;border-color:var(--bd)}
+.tb[aria-pressed=true]{background:var(--sel);border-color:#6f92c4}
+.tb:focus-visible,.btn:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #1d6fd1;outline-offset:1px}
+select{padding:2px 4px;border:1px solid var(--bd);border-radius:3px;background:#fff}
+#main{display:grid;grid-template-columns:230px 1fr 340px;min-height:0}
+.pane{background:var(--pane);overflow:auto;min-height:0}
+#tree{border-right:1px solid var(--bd);display:flex;flex-direction:column}
+#side{border-left:1px solid var(--bd)}
+.ph{background:linear-gradient(var(--h1),var(--h2));border-bottom:1px solid var(--bd);padding:3px 8px;font-weight:600;position:sticky;top:0;z-index:2}
+#treeBody{flex:1;overflow:auto;padding:2px 0}
+.tr{display:flex;align-items:center;gap:6px;padding:2px 8px;white-space:nowrap}
+.tr:hover{background:#e8f0fb}
+.tr.sel{background:var(--sel)}
+.tr.hov{background:#e8f0fb;outline:1px solid #9db9e0;outline-offset:-1px}
+.tr .sw{width:11px;height:11px;border:1px solid #555;flex:none}
+.tr label{flex:1;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+.grp{padding:3px 8px;font-weight:600;color:#33415a}
+#props{border-top:1px solid var(--bd);padding:6px 8px;min-height:120px;background:#fff;font-size:11.5px}
+#props b{display:block;margin-bottom:2px;font-size:12px}
+#props p{margin:2px 0;color:var(--mut)}
+#vp{position:relative;min-height:0;background:linear-gradient(#5a5a5a,#363636)}
+canvas#view{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+#note{position:absolute;left:8px;bottom:6px;color:#d6d6d6;font-size:11px;pointer-events:none;text-shadow:0 1px 2px #000}
+#banner{position:absolute;left:50%;top:10px;transform:translateX(-50%);padding:5px 14px;border-radius:3px;background:rgba(20,20,20,.78);color:#fff;font-weight:600;display:none;pointer-events:none;text-align:center}
+#banner.bad{background:rgba(190,30,20,.92)}
+section{border-bottom:1px solid var(--ln)}
+section>.bd{padding:7px 9px}
+.btns{display:flex;gap:6px;flex-wrap:wrap}
+.btn{padding:5px 12px;border:1px solid #6f87a8;border-radius:3px;background:linear-gradient(#fff,#e1e8f2);cursor:pointer;font-weight:600}
+.btn:hover{background:linear-gradient(#fff,#d4e2f5)}
+.btn.go{background:linear-gradient(#5fb36d,#2f8a42);color:#fff;border-color:#256d34}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:5px 0}
+.row output{font-weight:600;min-width:52px;text-align:right}
+input[type=range]{width:100%;margin:0 0 4px}
+.led{display:flex;align-items:center;gap:8px;margin:8px 0 2px}
+#ledDot{width:16px;height:16px;border-radius:50%;background:#888;border:1px solid #333;flex:none}
+#msg{font-weight:600}
+ol.st{list-style:none;margin:0 0 4px;padding:0}
+ol.st li{display:grid;grid-template-columns:18px 1fr 60px;align-items:center;gap:6px;padding:2px 0;color:var(--mut)}
+ol.st li.on{color:var(--tx);font-weight:600}
+ol.st li.done{color:var(--ok)}
+.bar{height:6px;background:#dde3ec;border-radius:3px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:#3d7fd6}
+table{width:100%;border-collapse:collapse}
+td{padding:2px 0;border-bottom:1px dotted var(--ln);vertical-align:top}
+td:last-child{text-align:right;font-weight:600;white-space:nowrap;padding-left:8px}
+td small{display:block;color:var(--mut);font-weight:400;white-space:normal}
+.good{color:var(--ok)}.bad{color:var(--bad)}
+#status{display:flex;gap:18px;padding:2px 10px;background:linear-gradient(#f3f6fb,#dbe4f1);border-top:1px solid var(--bd);white-space:nowrap;overflow:hidden}
+#status span:nth-child(2){flex:1;overflow:hidden;text-overflow:ellipsis}
+#tip{position:fixed;pointer-events:none;background:#ffffe1;border:1px solid #333;padding:2px 6px;font-size:11.5px;display:none;z-index:9}
+#load{position:fixed;inset:0;display:grid;place-items:center;background:#3b3b3b;color:#ddd;z-index:20;transition:opacity .3s}
+@media (max-width:900px){
+ body{overflow:auto}
+ #app{display:block;height:auto}
+ #main{display:flex;flex-direction:column}
+ #vp{height:56vh;order:1}
+ #side{order:2;border-left:0;overflow:visible}
+ #tree{order:3;border-right:0}
+ #treeBody{max-height:300px}
 }
-@media (prefers-reduced-motion:reduce){#sw,#sw::after{transition:none}}
 </style>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
 <script src="model-data.js"></script>
 </head>
 <body>
-<canvas id="view"></canvas>
-<header><h1>Twix-opener</h1><p>Привод правой части: двигатель, кривошип, ползун и ролики. Вращайте сцену мышью, колесо — масштаб.</p></header>
-
-<section id="hud" class="card" aria-label="Показатели">
-  <div class="grid">
-    <div class="m"><b id="vRpm">0</b><span>Обороты вала, об/мин</span></div>
-    <div class="m"><b id="vZ">0.0</b><span>Ход ползуна, мм</span></div>
-    <div class="m"><b id="vTau">0.000</b><span>Момент двигателя, Н·м</span></div>
-    <div class="m"><b id="vI">0.00</b><span>Ток, А</span></div>
+<div id="app">
+  <div id="titlebar">Twix-opener — Сборка_правая_часть<span>просмотр сборки и испытание по ТЗ</span></div>
+  <div id="toolbar" role="toolbar" aria-label="Панель вида">
+    <button class="tb" data-view="iso">Изометрия</button><button class="tb" data-view="front">Спереди</button><button class="tb" data-view="back">Сзади</button>
+    <button class="tb" data-view="top">Сверху</button><button class="tb" data-view="left">Слева</button><button class="tb" data-view="right">Справа</button>
+    <span class="sep"></span>
+    <button class="tb" data-shade="shade" aria-pressed="true">Полутоновое</button><button class="tb" data-shade="edges" aria-pressed="false">С рёбрами</button><button class="tb" data-shade="wire" aria-pressed="false">Каркас</button>
+    <span class="sep"></span>
+    <button class="tb" id="bEx" aria-pressed="false">Разнести</button>
+    <button class="tb" id="bSnd" aria-pressed="false">Звук</button>
+    <label>Время: <select id="ts"><option value="1">1×</option><option value="0.25">¼×</option><option value="0.05">1/20×</option></select></label>
   </div>
-  <canvas id="scope"></canvas>
-  <div class="legend"><span><i style="background:#c98a14"></i>ход ползуна</span><span><i style="background:#c43a2b"></i>обороты</span></div>
-</section>
-
-<section id="ctl" class="card" aria-label="Управление">
-  <div class="power">
-    <button id="sw" role="switch" aria-checked="false" aria-label="Питание двигателя"></button>
-    <div class="tx"><strong id="pw">Выключено</strong><span id="status">Пробел — включить</span></div>
+  <div id="main">
+    <aside id="tree" class="pane">
+      <div class="ph">Дерево модели</div>
+      <div id="treeBody"></div>
+      <div id="props"><b>Свойства</b><p>Выберите деталь в дереве или на модели.</p></div>
+    </aside>
+    <div id="vp"><canvas id="view"></canvas><div id="banner"></div><div id="note">ЛКМ — вращение · ПКМ — сдвиг · колесо — масштаб</div></div>
+    <aside id="side" class="pane">
+      <section><div class="ph">Испытание цикла</div><div class="bd">
+        <div class="btns">
+          <button class="btn go" id="bStart">Старт</button>
+          <button class="btn" id="bReset">Сброс</button>
+          <button class="btn" id="bAuto">Автотест ×5</button>
+        </div>
+        <div class="row"><label><input type="checkbox" id="cObj"> Батончик в устройстве</label><span style="color:var(--mut)">TCRT5000</span></div>
+        <div class="row"><label for="rW">Прочность упаковки</label><output id="oW">8 Н</output></div>
+        <input id="rW" type="range" min="2" max="30" step="1" value="8">
+        <div class="row"><label for="rT">Температура в помещении</label><output id="oT">22 °C</output></div>
+        <input id="rT" type="range" min="15" max="40" step="1" value="22">
+        <div class="led"><span id="ledDot"></span><span id="msg">Готов. Положите батончик.</span></div>
+      </div></section>
+      <section><div class="ph">Этапы цикла</div><div class="bd">
+        <ol class="st" id="stages"></ol>
+        <table><tr><td>Время цикла</td><td id="vCyc">—</td></tr></table>
+      </div></section>
+      <section><div class="ph">Датчики и приводы</div><div class="bd"><table>
+        <tr><td>Датчик объекта TCRT5000</td><td id="vObj">нет</td></tr>
+        <tr><td>Усилие захвата<small>предел для батончика ≈ 8 Н</small></td><td id="vF">0.0 Н</td></tr>
+        <tr><td>Температура внутри</td><td id="vTin">22.0 °C</td></tr>
+        <tr><td>Серво №1 (захват): угол / момент, Н·м</td><td id="vS1">0° / 0.000</td></tr>
+        <tr><td>Серво №2 (рейка): угол / момент, Н·м</td><td id="vS2">0° / 0.000</td></tr>
+        <tr><td>Ход рейки</td><td id="vY">0.0 мм</td></tr>
+        <tr><td>Упаковка</td><td id="vPk">цела</td></tr>
+      </table></div></section>
+      <section><div class="ph">Питание (2×18650, 2S)</div><div class="bd"><table>
+        <tr><td>Ток аккумулятора</td><td id="vIb">0 мА</td></tr>
+        <tr><td>Расход за последний цикл</td><td id="vMah">—</td></tr>
+        <tr><td>Хватит циклов на заряд</td><td id="vCycN">—</td></tr>
+      </table></div></section>
+      <section><div class="ph">Соответствие ТЗ</div><div class="bd"><table id="tz"></table></div></section>
+    </aside>
   </div>
-  <div>
-    <div class="row"><label for="rV">Напряжение</label><output id="oV">100 %</output></div>
-    <input id="rV" type="range" min="20" max="100" value="100">
-    <div class="row"><label for="rK">Жёсткость пружины</label><output id="oK">150 Н/м</output></div>
-    <input id="rK" type="range" min="0" max="1000" step="10" value="150">
-    <p class="hint">Если пружина окажется сильнее двигателя, вал заклинит.</p>
-  </div>
-  <div class="seg" role="group" aria-label="Скорость времени">
-    <button class="t" data-ts="1" aria-pressed="true">Реальное</button>
-    <button class="t" data-ts="0.25" aria-pressed="false">Замедл. ¼</button>
-    <button class="t" data-ts="0.05" aria-pressed="false">Замедл. 1/20</button>
-  </div>
-  <div class="btns">
-    <button class="t" id="bEx" aria-pressed="false">Разнести детали</button>
-    <button class="t" id="bWf" aria-pressed="false">Каркас</button>
-    <button class="t" id="bSnd" aria-pressed="false">Звук</button>
-    <button class="t" id="bRot" aria-pressed="false">Автовращение</button>
-  </div>
-  <button class="t" id="bCam">Сбросить камеру</button>
-</section>
-
+  <div id="status"><span id="stMsg">Готово</span><span id="stPart"></span><span id="stT">t = 0.0 с</span></div>
+</div>
 <div id="tip"></div>
 <div id="load">Загрузка модели…</div>
 
 <script type="module">
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 
-/* ============ ФИЗИКА (СИ: метры, кг, секунды, Н·м) ============ */
+/* ============ ФИЗИКА И АВТОМАТИКА (СИ) ============ */
 /*PHYS*/
-const P = {
-  R: 0.020,      // радиус кривошипа, м (по отверстию в модели)
-  J: 0.0020,     // момент инерции вала, ротора и кривошипа, кг·м²
-  tauS: 0.18,    // пусковой момент двигателя, Н·м
-  w0: 20,        // холостая угловая скорость при 100 % напряжения, рад/с (~190 об/мин)
-  b: 0.0004,     // вязкое трение вала, Н·м·с
-  tauC: 0.004,   // сухое трение подшипников, Н·м
-  m: 0.15,       // масса ползуна со всем, что на нём, кг
-  k: 150,        // жёсткость возвратной пружины, Н/м
-  c: 2.0,        // демпфирование на ползуне, Н·с/м
-  Fc: 0.8,       // сухое трение направляющих, Н
-  g: 9.81,
-  tauE: 0.04,    // электрическая постоянная времени, с
-  Imax: 3.0,     // пусковой ток, А
-  Idle: 0.15,    // ток холостого хода, А
-  roll: 1.5,     // передаточное число вала на ролики (принято)
-  gear: -1.2     // передаточное число вала на шестерню (принято)
+const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
+const smooth = x => { x = clamp(x, 0, 1); return x * x * (3 - 2 * x); };
+// MG90S при 6 В: 2,2 кг·см = 0,216 Н·м, 0,1 с / 60° (≈ 13 рад/с)
+const SV = { Tmax: 0.216, Wmax: 13, Kp: 40, Kt: 0.05, J: 2e-4, b: 3e-4, lim: 1.57 };
+const G = {
+  r: 0.010,        // делительный радиус шестерни, м (модуль 2, z = 10 по модели)
+  arm: 0.020,      // плечо усилия захвата на качалке, м (отверстие качалки R = 20 мм)
+  kc: 60,          // жёсткость контакта захвата с батончиком, Н/рад
+  contact: 0.70,   // угол касания, рад
+  Ftarget: 6,      // целевое усилие захвата, Н
+  close: 1.0,      // максимальная команда на захват, рад
+  Dp: 0.010, Dt: 0.006,          // ход рейки на прокол и на протяжку, м
+  yPierce: -0.007, yTorn: 0.004, // положения, при которых упаковка проколота / снята
+  Rbase: 0.6       // трение в направляющих рейки, Н
 };
-const S = { th: 0, w: 0, vin: 0, on: false, V: 1, tau: 0, tOn: 0, stallT: 0 };
-
-// Одна ось θ (кривошип). Ползун: z = R·sinθ (кулисный механизм).
-// Уравнение Лагранжа: (J + m·z'²)·θ'' = τдв − τтр + Fz·z' + m·R²·sinθ·cosθ·θ'²
-function stepPhysics(s, dt) {
-  s.vin += ((s.on ? s.V : 0) - s.vin) * (1 - Math.exp(-dt / P.tauE));
-  const sn = Math.sin(s.th), cs = Math.cos(s.th);
-  const z = P.R * sn, dz = P.R * cs, zd = dz * s.w;
-  const Fz = -P.k * z - P.c * zd - P.Fc * Math.tanh(zd / 0.01) - P.m * P.g;
-  const tauM = s.on ? P.tauS * (s.vin - s.w / P.w0) : 0;   // момент падает с ростом противо-ЭДС
-  const tauF = P.b * s.w + P.tauC * Math.tanh(s.w / 0.3);
-  const M = P.J + P.m * dz * dz;
-  const a = (tauM - tauF + Fz * dz + P.m * P.R * P.R * cs * sn * s.w * s.w) / M;
-  s.w += a * dt;
-  s.th += s.w * dt;
-  s.tau = tauM;
-  s.z = z;
-  s.on ? (s.tOn += dt) : (s.tOn = 0);
-  s.stallT = (s.on && Math.abs(s.w) < 0.6 && s.tOn > 0.4) ? s.stallT + dt : 0;
+const STAGES = [
+  { n: 'Захват', T: 2.0 }, { n: 'Прокол упаковки', T: 1.6 }, { n: 'Протяжка и снятие', T: 3.2 },
+  { n: 'Отделение продукта', T: 2.0 }, { n: 'Готово', T: 1.0 }
+];
+const mk = () => ({ th: 0, w: 0, tau: 0 });
+const S = {
+  s1: mk(), s2: mk(), stage: -1, t: 0, time: 0, cycleT: 0, obj: false, F: 0, Fpeak: 0,
+  pierced: false, torn: false, hold: false, tHold: 0, cmd1: 0, cmd2: 0, h1: 0, fault: '',
+  cycles: 0, ok: 0, lastT: 0, lastPeak: 0, Ftear: 8, env: 22, Tin: 22, I1: 0, I2: 0, Ibat: 0,
+  cycMAh: 0, lastMAh: 0, justFinished: false
+};
+function canStart() {
+  if (S.stage >= 0) return 'Цикл уже идёт';
+  if (S.fault) return 'Нажмите «Сброс»';
+  if (!S.obj) return 'Нет батончика (датчик TCRT5000)';
+  if (S.Tin >= 30) return 'Внутри слишком тепло: риск таяния';
+  return '';
+}
+function start() {
+  const why = canStart(); if (why) return why;
+  Object.assign(S, { stage: 0, t: 0, cycleT: 0, pierced: false, torn: false, hold: false, Fpeak: 0, cycMAh: 0, cmd1: 0, cmd2: 0 });
+  return '';
+}
+function resetAll() { Object.assign(S, { stage: -1, fault: '', t: 0, hold: false, cmd1: 0, cmd2: 0, pierced: false, torn: false }); }
+function servo(sv, cmd, tauLoad, dt) {
+  const wd = clamp(SV.Kp * (cmd - sv.th), -SV.Wmax, SV.Wmax);
+  sv.tau = clamp(SV.Kt * (wd - sv.w), -SV.Tmax, SV.Tmax);
+  sv.w += (sv.tau - tauLoad - SV.b * sv.w) / SV.J * dt;
+  sv.th += sv.w * dt;
+  if (Math.abs(sv.th) > SV.lim) { sv.th = Math.sign(sv.th) * SV.lim; sv.w = 0; }
+}
+function wrapR(y) {                // сопротивление упаковки движению рейки, Н
+  if (S.torn) return G.Rbase;
+  if (!S.pierced) return G.Rbase + 0.6 * S.Ftear * clamp((-0.002 - y) / 0.004, 0, 1);
+  return G.Rbase + S.Ftear;
+}
+function fail(msg) { S.fault = msg; S.stage = -1; }
+function next() { S.stage++; S.t = 0; }
+function step(dt) {
+  S.time += dt;
+  S.F = (S.obj && S.stage >= 0) ? G.kc * Math.max(0, S.s1.th - G.contact) : 0;
+  if (S.F > S.Fpeak) S.Fpeak = S.F;
+  if (S.stage >= 0) {
+    const st = STAGES[S.stage], u = S.t / st.T;
+    S.t += dt; S.cycleT += dt;
+    if (S.stage === 0) {
+      if (!S.hold) { S.cmd1 = G.close * smooth(u); if (S.F >= G.Ftarget) { S.hold = true; S.cmd1 = S.s1.th; S.tHold = S.t; } }
+      if (S.t >= st.T || (S.hold && S.t > S.tHold + 0.3)) { S.h1 = S.cmd1; next(); }
+    } else if (S.stage === 1) {
+      S.cmd2 = -(G.Dp / G.r) * smooth(u);
+      if (S.t >= st.T) { if (!S.pierced || Math.abs(S.cmd2 - S.s2.th) > 0.3) fail('Перегрузка привода №2: упаковка не проколота'); else next(); }
+    } else if (S.stage === 2) {
+      S.cmd2 = -(G.Dp / G.r) + ((G.Dp + G.Dt) / G.r) * smooth(u);
+      if (S.t >= st.T) { if (!S.torn) fail('Перегрузка привода №2: упаковка не снята'); else next(); }
+    } else if (S.stage === 3) {
+      S.cmd1 = S.h1 * (1 - smooth(u)); S.cmd2 = (G.Dt / G.r) * (1 - smooth(u));
+      if (S.t >= st.T) next();
+    } else if (S.stage === 4) {
+      if (S.t >= st.T) {
+        S.stage = -1; S.cycles++; S.ok++; S.lastT = S.cycleT; S.lastPeak = S.Fpeak; S.lastMAh = S.cycMAh;
+        S.obj = false; S.justFinished = true;
+      }
+    }
+  }
+  servo(S.s1, S.cmd1, S.F * G.arm, dt);
+  const y = G.r * S.s2.th, v = G.r * S.s2.w;
+  if (!S.pierced && y < G.yPierce) S.pierced = true;
+  if (S.pierced && !S.torn && y > G.yTorn) S.torn = true;
+  servo(S.s2, S.cmd2, G.r * wrapR(y) * Math.tanh(v / 0.003), dt);
+  // электрика: ток серво при 6 В, ESP32 ≈ 0,3 Вт, КПД LM2596 ≈ 85 %, аккумулятор 7,4 В
+  const I = s => 0.012 + 0.70 * Math.min(1, Math.abs(s.tau) / SV.Tmax);
+  S.I1 = I(S.s1); S.I2 = I(S.s2);
+  const Pb = (6 * (S.I1 + S.I2 + 0.012) + 0.3) / 0.85;
+  S.Ibat = Pb / 7.4; S.cycMAh += S.Ibat * dt / 3.6;
+  S.Tin += ((0.25 * Pb) / 80 - (S.Tin - S.env) / 300) * dt;
 }
 /*ENDPHYS*/
 
 /* ============ СЦЕНА ============ */
-const canvas = document.getElementById('view');
+const canvas = document.getElementById('view'), vp = document.getElementById('vp');
 let renderer;
 try { renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true }); }
 catch (e) { document.getElementById('load').textContent = 'WebGL недоступен в этом браузере.'; throw e; }
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.05;
-
 const scene = new THREE.Scene();
-const pmrem = new THREE.PMREMGenerator(renderer);
-scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
-const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 500);
-const CAM0 = new THREE.Vector3(14, 9, 18);
-camera.position.copy(CAM0);
+const camera = new THREE.PerspectiveCamera(32, 1, 0.1, 500);
+scene.add(camera);
+scene.add(new THREE.AmbientLight(0xffffff, 0.62));
+const key = new THREE.DirectionalLight(0xffffff, 1.05); key.position.set(0.4, 0.8, 1); camera.add(key);
+const fill = new THREE.DirectionalLight(0xffffff, 0.35); fill.position.set(-1, -0.6, 0.5); camera.add(fill);
 const controls = new OrbitControls(camera, canvas);
-controls.enableDamping = true; controls.minDistance = 8; controls.maxDistance = 80;
-controls.maxPolarAngle = Math.PI * 0.495; controls.autoRotateSpeed = 1.2;
+controls.enableDamping = true; controls.minDistance = 6; controls.maxDistance = 90;
 
-const sun = new THREE.DirectionalLight(0xffffff, 1.6);
-sun.position.set(12, 24, 14); sun.castShadow = true;
-sun.shadow.mapSize.set(2048, 2048); sun.shadow.bias = -0.0006;
-Object.assign(sun.shadow.camera, { left: -18, right: 18, top: 18, bottom: -18, near: 1, far: 70 });
-scene.add(sun);
-const floor = new THREE.Mesh(new THREE.PlaneGeometry(120, 120), new THREE.ShadowMaterial({ opacity: 0.22 }));
-floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor);
-const grid = new THREE.GridHelper(60, 60, 0x7d8b95, 0x9aa6ae);
-grid.material.transparent = true; grid.material.opacity = 0.35; scene.add(grid);
-
-/* ============ МОДЕЛЬ ============ */
-// CAD: Z вверх, мм. Группа cad переводит в Y-вверх и сантиметры.
+// CAD: Z вверх, мм → three: Y вверх, см. Центр сборки в начале координат.
 const cad = new THREE.Group();
-cad.rotation.x = -Math.PI / 2; cad.scale.setScalar(0.1); cad.position.set(-2.7, 0.8, -0.5);
+cad.rotation.x = -Math.PI / 2; cad.scale.setScalar(0.1); cad.position.set(-1.57, 0, -0.4);
 scene.add(cad);
-const slider = new THREE.Group(); cad.add(slider);
 
 const MODEL = window.TWIX_MODEL;
 const bin = Uint8Array.from(atob(MODEL.bin), c => c.charCodeAt(0)).buffer;
 const WHEELS = [9, 12, 15, 18];
-const parts = [], wheels = [];
-let crank, gear;
 
 function makeGeometry(m) {
   const q = new Uint16Array(bin, m.po, m.nv * 3), pos = new Float32Array(m.nv * 3);
@@ -203,170 +275,257 @@ function makeGeometry(m) {
   return g;
 }
 
-function describe(m) {
-  const i = m.i, mv = 'Движется';
-  const D = {
-    0: { col: 0x6f8798, d: 'Неподвижный корпус с фланцем. Несёт на себе ролики.' },
-    1: { col: 0x8d9da8, off: [-50, 0, 0], d: 'Неподвижный кронштейн двигателя.' },
-    2: { col: 0x39464f, off: [-30, 0, 14], d: 'Неподвижный хомут на валу.' },
-    3: { col: 0xc9ced2, off: [-18, 0, 30], metal: 1, d: 'Пружина у двигателя, неподвижна.' },
-    4: { col: 0xd9a22b, off: [-14, 0, 0], d: mv + ': вращается с валом, радиус отверстия 20 мм.', pivot: [0, 0, 0] },
-    5: { col: 0xd9a22b, off: [0, 30, 0], par: slider, d: mv + ': ходит вверх-вниз за кривошипом (z = R·sinθ).' },
-    6: { col: 0xc9ced2, off: [0, 48, 18], par: slider, metal: 1, d: mv + ': пружина едет вместе с ползуном.' },
-    7: { col: 0xe6b84a, off: [0, 30, -26], par: slider, pivot: [m.center[0], m.center[1], 0], d: mv + ': шестерня на ползуне, вращается от вала (передача принята).' },
-    8: { col: 0xd9a22b, off: [10, 30, -42], par: slider, d: mv + ': звено едет вместе с ползуном.' }
-  };
-  if (D[i]) return D[i];
-  if (WHEELS.includes(i)) return { col: 0xa8332b, wheel: 1, off: [0, -34, 0], pivot: [0, m.center[1], m.center[2]], d: mv + ': ролик, вращается от вала (передача принята).' };
-  return { col: 0x4f5e69, block: 1, d: 'Неподвижная опора ролика.' };
+// Названия даны по форме и цвету детали в STEP — при необходимости поправьте здесь.
+const INFO = {
+  0: ['Корпус с фланцем', 'Неподвижно. Цилиндрический фланец и короб с аркой.', [0, 0, 0]],
+  1: ['Основание сервопривода №1', 'Неподвижно. Красная деталь, в ней стоит сервопривод №1.', [-45, 0, 0]],
+  2: ['Захват (жёлтый)', 'Неподвижно. Жёлтый крюк рядом с сервоприводом №1.', [-30, 0, 18]],
+  3: ['Сервопривод №1 MG90S', 'Неподвижно. Вал на оси X, на нём качалка.', [-20, 0, -26]],
+  4: ['Качалка сервопривода №1', 'Движется: поворот вокруг оси X, угол до ±90°. Отверстия на радиусе 20 мм.', [-12, 0, 0]],
+  5: ['Кронштейн сервопривода №2', 'Неподвижно. Держит сервопривод №2.', [0, 26, 12]],
+  6: ['Сервопривод №2 MG90S', 'Неподвижно. Вал вертикальный, на нём шестерня.', [0, 40, 28]],
+  7: ['Шестерня m = 2, z = 10', 'Движется: вращается вместе с валом сервопривода №2.', [0, 26, -26]],
+  8: ['Рейка с наконечниками', 'Движется вдоль оси Y: ход = радиус шестерни × угол поворота.', [14, 26, -42]]
+};
+const meta = MODEL.parts, wheelMeta = WHEELS.map(i => meta[i]), unitOf = {};
+WHEELS.forEach((w, k) => unitOf[w] = k + 1);
+for (const m of meta) if (m.i >= 9 && !WHEELS.includes(m.i)) {
+  let best = 0, bd = 1e9;
+  wheelMeta.forEach((w, k) => { const d = Math.hypot(w.center[0] - m.center[0], w.center[2] - m.center[2]); if (d < bd) { bd = d; best = k; } });
+  unitOf[m.i] = best + 1;
 }
 
-for (const m of MODEL.parts) {
-  const d = describe(m);
-  const mat = new THREE.MeshStandardMaterial({ color: d.col, metalness: d.metal ? 0.9 : 0.35, roughness: d.metal ? 0.28 : 0.5, side: THREE.DoubleSide });
+const parts = [];
+let horn, gear, rack;
+for (const m of meta) {
+  let name, desc, off;
+  if (INFO[m.i]) [name, desc, off] = INFO[m.i];
+  else if (WHEELS.includes(m.i)) { name = 'Ролик ' + unitOf[m.i]; desc = 'Неподвижно. Ролик на оси X.'; off = [0, -34, 0]; }
+  else {
+    const w = wheelMeta[unitOf[m.i] - 1];
+    name = 'Проушина ролика ' + unitOf[m.i]; desc = 'Неподвижно. Опора оси ролика.';
+    off = [Math.sign(m.center[0] - w.center[0]) * 14, -34, Math.sign(m.center[2]) * 16];
+  }
+  const col = new THREE.Color().setRGB(m.col[0], m.col[1], m.col[2], THREE.SRGBColorSpace);
+  const mat = new THREE.MeshPhongMaterial({ color: col, specular: 0x2a2a2a, shininess: 35, side: THREE.DoubleSide });
   const mesh = new THREE.Mesh(makeGeometry(m), mat);
-  mesh.castShadow = mesh.receiveShadow = true;
   const wrap = new THREE.Group(), pivot = new THREE.Group();
-  if (d.pivot) { pivot.position.set(...d.pivot); mesh.position.set(-d.pivot[0], -d.pivot[1], -d.pivot[2]); }
-  pivot.add(mesh); wrap.add(pivot); (d.par || cad).add(wrap);
-  const rec = { m, d, mesh, wrap, pivot, off: d.off ? d.off.slice() : [0, 0, 0] };
+  if (m.i === 7) { pivot.position.set(m.center[0], m.center[1], 0); mesh.position.set(-m.center[0], -m.center[1], 0); }
+  pivot.add(mesh); wrap.add(pivot); cad.add(wrap);
+  const rec = { m, name, desc, off, mesh, wrap, pivot, edges: null };
   parts.push(rec);
-  if (m.i === 4) crank = rec;
+  if (m.i === 4) horn = rec;
   if (m.i === 7) gear = rec;
-  if (d.wheel) wheels.push({ rec, dir: m.center[2] > 0 ? 1 : -1 });
+  if (m.i === 8) rack = rec;
 }
-// разнос опор роликов: от своего ролика наружу
-for (const r of parts) if (r.d.block) {
-  const w = wheels.map(x => x.rec).reduce((a, b) => Math.hypot(a.m.center[0] - r.m.center[0], a.m.center[2] - r.m.center[2]) < Math.hypot(b.m.center[0] - r.m.center[0], b.m.center[2] - r.m.center[2]) ? a : b);
-  r.off = [Math.sign(r.m.center[0] - w.m.center[0]) * 14, -34, Math.sign(r.m.center[2]) * 16];
-  r.wrapRoller = w;
-}
-document.getElementById('load').style.opacity = 0;
-setTimeout(() => document.getElementById('load').remove(), 450);
 
-/* ============ УПРАВЛЕНИЕ ============ */
+/* ============ ДЕРЕВО, СВОЙСТВА, ПОДСКАЗКИ ============ */
 const $ = id => document.getElementById(id);
-const sw = $('sw'), reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-let timeScale = 1, exTarget = 0, ex = 0, soundOn = false, au = null;
-
-function setPower(on) {
-  S.on = on; sw.setAttribute('aria-checked', on);
-  if (on && soundOn) audioInit();
+const rowsOf = new Map(); let selected = null, hover = null;
+const massOf = p => (p.m.i === 3 || p.m.i === 6) ? 13.4 : p.m.vol * 1.24;
+const tb = $('treeBody');
+function addGroup(t) { const d = document.createElement('div'); d.className = 'grp'; d.textContent = t; tb.appendChild(d); }
+function addRow(p) {
+  const d = document.createElement('div'); d.className = 'tr';
+  const c = p.m.col.map(v => Math.round(v * 255));
+  d.innerHTML = `<span class="sw" style="background:rgb(${c})"></span><input type="checkbox" checked aria-label="Показать"><label>${p.name}</label>`;
+  d.querySelector('input').addEventListener('change', e => { p.wrap.visible = e.target.checked; });
+  d.addEventListener('click', e => { if (e.target.tagName !== 'INPUT') select(p); });
+  d.addEventListener('mouseenter', () => setHover(p)); d.addEventListener('mouseleave', () => setHover(null));
+  tb.appendChild(d); rowsOf.set(p, d);
 }
-sw.addEventListener('click', () => setPower(!S.on));
-addEventListener('keydown', e => {
-  if (e.code === 'Space' && !e.target.closest('button,input')) { e.preventDefault(); setPower(!S.on); }
-});
-const bind = (id, fn) => { const el = $(id); el.addEventListener('click', () => { const v = el.getAttribute('aria-pressed') !== 'true'; el.setAttribute('aria-pressed', v); fn(v); }); };
-bind('bEx', v => { exTarget = v ? 1 : 0; if (reduce) ex = exTarget; });
-bind('bWf', v => parts.forEach(p => p.mesh.material.wireframe = v));
-bind('bSnd', v => { soundOn = v; if (v) audioInit(); });
-bind('bRot', v => controls.autoRotate = v && !reduce);
-$('bCam').addEventListener('click', () => { camera.position.copy(CAM0); controls.target.set(0, 0, 0); controls.update(); });
-$('rV').addEventListener('input', e => { S.V = e.target.value / 100; $('oV').textContent = e.target.value + ' %'; });
-$('rK').addEventListener('input', e => { P.k = +e.target.value; $('oK').textContent = e.target.value + ' Н/м'; });
-document.querySelectorAll('[data-ts]').forEach(b => b.addEventListener('click', () => {
-  timeScale = +b.dataset.ts;
-  document.querySelectorAll('[data-ts]').forEach(x => x.setAttribute('aria-pressed', x === b));
-}));
+addGroup('Сборка'); parts.filter(p => p.m.i <= 8).forEach(addRow);
+addGroup('Узлы роликов'); parts.filter(p => p.m.i >= 9).sort((a, b) => unitOf[a.m.i] - unitOf[b.m.i] || a.m.i - b.m.i).forEach(addRow);
 
-function audioInit() {
-  if (!au) {
-    const c = new (window.AudioContext || window.webkitAudioContext)();
-    const o = c.createOscillator(), f = c.createBiquadFilter(), g = c.createGain();
-    o.type = 'sawtooth'; f.type = 'lowpass'; f.frequency.value = 600; g.gain.value = 0;
-    o.connect(f); f.connect(g); g.connect(c.destination); o.start(); au = { c, o, g };
-  }
-  au.c.resume();
+function paint(p) { p.mesh.material.emissive.setHex(p === selected ? 0x1d4f9c : p === hover ? 0x40361a : 0); }
+function select(p) {
+  const old = selected; selected = p;
+  if (old) { paint(old); rowsOf.get(old).classList.remove('sel'); }
+  if (p) {
+    paint(p); const r = rowsOf.get(p); r.classList.add('sel'); r.scrollIntoView({ block: 'nearest' });
+    const c = p.m.bb, sz = [0, 1, 2].map(k => (c[1][k] - c[0][k]).toFixed(1)).join(' × ');
+    $('props').innerHTML = `<b>${p.name}</b><p>${p.desc}</p><p>Габариты: ${sz} мм</p><p>Объём: ${p.m.vol.toFixed(2)} см³</p><p>Масса (оценка): ${massOf(p).toFixed(1)} г</p>`;
+  } else $('props').innerHTML = '<b>Свойства</b><p>Выберите деталь в дереве или на модели.</p>';
 }
-
-/* подсказка при наведении */
+function setHover(p) {
+  if (hover === p) return;
+  const old = hover; hover = p;
+  if (old) { paint(old); rowsOf.get(old).classList.remove('hov'); }
+  if (p) { paint(p); rowsOf.get(p).classList.add('hov'); }
+  $('stPart').textContent = p ? p.name : '';
+}
 const ray = new THREE.Raycaster(), ptr = new THREE.Vector2(), tip = $('tip');
-let hover = null, ptrDirty = false, px = 0, py = 0;
+let px = -1, py = -1, ptrDirty = false, downX = 0, downY = 0;
 canvas.addEventListener('pointermove', e => { px = e.clientX; py = e.clientY; ptrDirty = true; });
-canvas.addEventListener('pointerleave', () => { px = py = -1; ptrDirty = true; });
-function pick() {
+canvas.addEventListener('pointerleave', () => { px = -1; ptrDirty = true; });
+canvas.addEventListener('pointerdown', e => { downX = e.clientX; downY = e.clientY; });
+canvas.addEventListener('pointerup', e => {
+  if (Math.hypot(e.clientX - downX, e.clientY - downY) < 4) { const h = pickAt(e.clientX, e.clientY); select(h === selected ? null : h); }
+});
+function pickAt(x, y) {
+  const r = canvas.getBoundingClientRect();
+  ptr.set((x - r.left) / r.width * 2 - 1, -((y - r.top) / r.height) * 2 + 1);
+  ray.setFromCamera(ptr, camera);
+  const h = ray.intersectObjects(parts.filter(p => p.wrap.visible).map(p => p.mesh), false)[0];
+  return h ? parts.find(p => p.mesh === h.object) : null;
+}
+function doHover() {
   ptrDirty = false;
-  let hit = null;
-  if (px >= 0) {
-    ptr.set(px / innerWidth * 2 - 1, -(py / innerHeight) * 2 + 1);
-    ray.setFromCamera(ptr, camera);
-    const h = ray.intersectObjects(parts.map(p => p.mesh), false)[0];
-    if (h) hit = parts.find(p => p.mesh === h.object);
+  const p = px >= 0 ? pickAt(px, py) : null; setHover(p);
+  if (p) { tip.textContent = p.name; tip.style.display = 'block'; tip.style.left = px + 14 + 'px'; tip.style.top = py + 16 + 'px'; }
+  else tip.style.display = 'none';
+}
+$('load').style.opacity = 0; setTimeout(() => $('load').remove(), 350);
+
+/* ============ ВИДЫ И РЕЖИМЫ ============ */
+const VIEWS = { iso: [1, 0.75, 1.15], front: [0, 0, 1], back: [0, 0, -1], top: [0, 1, 0.001], left: [-1, 0, 0], right: [1, 0, 0] };
+function setView(k) { camera.position.set(...VIEWS[k]).normalize().multiplyScalar(24); controls.target.set(0, 0, 0); controls.update(); }
+document.querySelectorAll('[data-view]').forEach(b => b.addEventListener('click', () => setView(b.dataset.view)));
+setView('iso');
+function setShade(mode) {
+  document.querySelectorAll('[data-shade]').forEach(b => b.setAttribute('aria-pressed', b.dataset.shade === mode));
+  for (const p of parts) {
+    p.mesh.material.wireframe = mode === 'wire';
+    if (mode === 'edges' && !p.edges) {
+      p.edges = new THREE.LineSegments(new THREE.EdgesGeometry(p.mesh.geometry, 35), new THREE.LineBasicMaterial({ color: 0x101010 }));
+      p.mesh.add(p.edges);
+    }
+    if (p.edges) p.edges.visible = mode === 'edges';
   }
-  if (hit !== hover) {
-    if (hover) hover.mesh.material.emissive.setHex(0);
-    hover = hit;
-    if (hover) hover.mesh.material.emissive.setHex(0x3a2a08);
-  }
-  if (hover) {
-    tip.innerHTML = '<b>' + hover.m.name + '</b>' + hover.d.d + ' Объём ≈ ' + hover.m.vol.toFixed(1) + ' см³.';
-    tip.style.left = Math.min(px + 16, innerWidth - 250) + 'px'; tip.style.top = (py + 16) + 'px'; tip.style.opacity = 1;
-  } else tip.style.opacity = 0;
+}
+document.querySelectorAll('[data-shade]').forEach(b => b.addEventListener('click', () => setShade(b.dataset.shade)));
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+let ex = 0, exT = 0, timeScale = 1, soundOn = false, au = null;
+$('bEx').addEventListener('click', e => { const v = e.currentTarget.getAttribute('aria-pressed') !== 'true'; e.currentTarget.setAttribute('aria-pressed', v); exT = v ? 1 : 0; if (reduce) ex = exT; });
+$('bSnd').addEventListener('click', e => { soundOn = e.currentTarget.getAttribute('aria-pressed') !== 'true'; e.currentTarget.setAttribute('aria-pressed', soundOn); if (soundOn) audio(); });
+$('ts').addEventListener('change', e => timeScale = +e.target.value);
+function audio() { if (!au) au = new (window.AudioContext || window.webkitAudioContext)(); au.resume(); }
+function beep(f, d, t0) {
+  if (!au) return;
+  const o = au.createOscillator(), g = au.createGain(), t = au.currentTime + t0;
+  o.frequency.value = f; g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.12, t + 0.01);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + d); o.connect(g); g.connect(au.destination); o.start(t); o.stop(t + d + 0.02);
 }
 
-/* ============ ЦИКЛ ============ */
-const sc = $('scope'), sctx = sc.getContext('2d'), N = 240, hz = [], hr = [];
-function drawScope() {
-  const dpr = Math.min(devicePixelRatio, 2), w = sc.clientWidth, h = sc.clientHeight;
-  if (!w) return;
-  if (sc.width !== w * dpr) { sc.width = w * dpr; sc.height = h * dpr; }
-  sctx.setTransform(dpr, 0, 0, dpr, 0, 0); sctx.clearRect(0, 0, w, h);
-  sctx.strokeStyle = 'rgba(29,40,48,.18)'; sctx.beginPath(); sctx.moveTo(0, h / 2); sctx.lineTo(w, h / 2); sctx.stroke();
-  const line = (arr, col, f) => { sctx.strokeStyle = col; sctx.lineWidth = 1.8; sctx.beginPath();
-    arr.forEach((v, i) => { const x = i / (N - 1) * w, y = h - 6 - f(v) * (h - 12); i ? sctx.lineTo(x, y) : sctx.moveTo(x, y); }); sctx.stroke(); };
-  line(hz, '#c98a14', v => (v / (P.R * 1000) + 1) / 2);
-  line(hr, '#c43a2b', v => Math.min(1, Math.max(0, v / 220)));
+/* ============ УПРАВЛЕНИЕ ИСПЫТАНИЕМ ============ */
+let auto = 0, autoWait = 0, runs = [], note = '';
+const cObj = $('cObj'), bAuto = $('bAuto');
+const autoOff = () => { auto = 0; bAuto.textContent = 'Автотест ×5'; };
+cObj.addEventListener('change', () => S.obj = cObj.checked);
+$('rW').addEventListener('input', e => { S.Ftear = +e.target.value; $('oW').textContent = e.target.value + ' Н'; });
+$('rT').addEventListener('input', e => { S.env = +e.target.value; $('oT').textContent = e.target.value + ' °C'; });
+$('bStart').addEventListener('click', () => { note = start(); if (!note && soundOn) { audio(); beep(660, 0.08, 0); } });
+$('bReset').addEventListener('click', () => { resetAll(); autoOff(); note = 'Сброс. Механизм возвращается в исходное положение.'; });
+bAuto.addEventListener('click', () => {
+  if (auto > 0) { autoOff(); return; }
+  resetAll(); runs = []; auto = 5; autoWait = 0.6; bAuto.textContent = 'Остановить автотест';
+});
+addEventListener('keydown', e => { if (e.code === 'Space' && !e.target.closest('button,input,select')) { e.preventDefault(); $('bStart').click(); } });
+
+const stageEl = $('stages');
+STAGES.forEach(s => { const li = document.createElement('li'); li.innerHTML = `<span>○</span><span>${s.n}</span><div class="bar"><i></i></div>`; stageEl.appendChild(li); });
+const lis = [...stageEl.children];
+
+const bb = [[1e9, 1e9, 1e9], [-1e9, -1e9, -1e9]];
+for (const m of meta) for (let k = 0; k < 3; k++) { bb[0][k] = Math.min(bb[0][k], m.bb[0][k]); bb[1][k] = Math.max(bb[1][k], m.bb[1][k]); }
+const dims = [0, 1, 2].map(k => bb[1][k] - bb[0][k]);
+const massG = parts.reduce((a, p) => a + massOf(p), 0), battG = 92;
+function tz() {
+  const f = (ok, a, b) => `<td>${a}<small>${b}</small></td><td class="${ok === null ? '' : ok ? 'good' : 'bad'}">${ok === null ? '—' : ok ? '✔' : '✘'}</td>`;
+  const has = S.cycles > 0;
+  const rows = [
+    f(dims[0] <= 250 && dims[1] <= 200 && dims[2] <= 150, `Габариты: ${dims.map(v => v.toFixed(0)).join('×')} мм`, 'правая часть; предел 250×200×150'),
+    f(massG + battG <= 1000, `Масса ≈ ${(massG + battG).toFixed(0)} г`, 'правая часть, PLA 100 % + 2 АКБ; левая не учтена; предел 1 кг'),
+    f(true, 'Питание 2S Li-ion, до 8,4 В', 'предел 12 В; серво через LM2596 на 6 В'),
+    f(null, 'Приводы: 2 серво MG90S', 'в этой части; коллекторных двигателей нет'),
+    f(has ? S.lastT <= 30 : null, `Время цикла: ${has ? S.lastT.toFixed(1) + ' с' : '—'}`, 'предел 30 с, оптимум до 15 с'),
+    f(has ? S.lastPeak <= 8 : null, `Пик усилия захвата: ${has ? S.lastPeak.toFixed(1) + ' Н' : '—'}`, 'для деформации не более 1–2 мм'),
+    f(S.ok >= 5 ? true : (S.fault ? false : null), `Успешных циклов: ${S.ok}`, 'нужно не менее 5 без подстройки')
+  ];
+  $('tz').innerHTML = rows.map(r => `<tr>${r}</tr>`).join('');
 }
-const rpmOf = () => S.w * 60 / (2 * Math.PI);
-let last = performance.now(), acc = 0, hudT = 0;
+
+/* ============ ЦИКЛ ОТРИСОВКИ ============ */
+const banner = $('banner');
+let last = performance.now(), acc = 0, hudT = 1, ledBlink = 0;
+const H = 1 / 4000;
 function frame(t) {
   const dt = Math.min(0.05, (t - last) / 1000); last = t;
   acc += dt * timeScale;
-  const H = 1 / 1000;
-  while (acc >= H) { stepPhysics(S, H); acc -= H; }
+  while (acc >= H) { step(H); acc -= H; }
 
-  crank.pivot.rotation.x = S.th;
-  slider.position.z = P.R * 1000 * Math.sin(S.th);
-  gear.pivot.rotation.z = P.gear * S.th;
-  for (const w of wheels) w.rec.pivot.rotation.x = w.dir * P.roll * S.th;
-
-  if (!reduce) ex += (exTarget - ex) * (1 - Math.exp(-dt * 6));
-  if (Math.abs(exTarget - ex) < 0.001) ex = exTarget;
-  for (const p of parts) p.wrap.position.set(p.off[0] * ex, p.off[1] * ex, p.off[2] * ex);
-  floor.position.y = grid.position.y = -5.3 - 4.8 * ex;
-
-  hz.push(S.z * 1000); hr.push(Math.abs(rpmOf())); if (hz.length > N) { hz.shift(); hr.shift(); }
-  if ((hudT += dt) > 0.1) {
-    hudT = 0;
-    const rpm = rpmOf(), I = S.on ? P.Imax * Math.abs(S.tau) / P.tauS + P.Idle : 0;
-    $('vRpm').textContent = Math.abs(rpm).toFixed(0);
-    $('vZ').textContent = (S.z * 1000).toFixed(1);
-    $('vTau').textContent = S.tau.toFixed(3);
-    $('vI').textContent = I.toFixed(2);
-    const stall = S.stallT > 0.5, st = $('status');
-    $('pw').textContent = S.on ? 'Включено' : 'Выключено';
-    st.classList.toggle('warn', stall);
-    st.textContent = stall ? 'Перегрузка: вал заклинило' : S.on ? (S.tOn < 0.8 ? 'Разгон' : 'Рабочий режим') : (Math.abs(rpm) > 2 ? 'Выбег по инерции' : 'Пробел — включить');
+  if (S.justFinished) {
+    S.justFinished = false; ledBlink = 2.5; cObj.checked = false;
+    if (soundOn) { beep(880, 0.15, 0); beep(1175, 0.2, 0.2); }
+    if (auto > 0) {
+      runs.push(S.lastT); auto--; autoWait = 0.8;
+      if (!auto) { autoOff(); note = `Автотест завершён: ${runs.length} цикла, среднее ${(runs.reduce((a, b) => a + b, 0) / runs.length).toFixed(1)} с.`; }
+    }
   }
-  if (au && soundOn) {
-    au.o.frequency.setTargetAtTime(30 + Math.abs(rpmOf()) * 0.9, au.c.currentTime, 0.05);
-    au.g.gain.setTargetAtTime(Math.min(0.05, Math.abs(rpmOf()) / 4000), au.c.currentTime, 0.08);
-  } else if (au) au.g.gain.setTargetAtTime(0, au.c.currentTime, 0.05);
+  if (auto > 0 && S.stage < 0) {
+    if (S.fault) autoOff();
+    else if ((autoWait -= dt) <= 0) { S.obj = true; cObj.checked = true; note = start(); if (note) autoOff(); }
+  }
+  if (ledBlink > 0) ledBlink -= dt;
 
-  if (ptrDirty) pick();
-  drawScope();
+  horn.pivot.rotation.x = S.s1.th;
+  gear.pivot.rotation.z = S.s2.th;
+  rack.pivot.position.y = G.r * S.s2.th * 1000;
+  if (!reduce) ex += (exT - ex) * (1 - Math.exp(-dt * 6));
+  if (Math.abs(exT - ex) < 0.001) ex = exT;
+  for (const p of parts) p.wrap.position.set(p.off[0] * ex, p.off[1] * ex, p.off[2] * ex);
+
+  if (ptrDirty) doHover();
   controls.update();
   renderer.render(scene, camera);
+  if ((hudT += dt) > 0.1) { hudT = 0; hud(); }
   requestAnimationFrame(frame);
 }
-function resize() {
-  const w = innerWidth, h = innerHeight;
-  renderer.setSize(w, h, false); camera.aspect = w / h;
-  camera.fov = w < h ? 50 : 35; camera.updateProjectionMatrix();
+function hud() {
+  const deg = r => (r * 180 / Math.PI).toFixed(0) + '°';
+  $('vObj').textContent = S.obj ? 'есть' : 'нет';
+  $('vF').textContent = S.F.toFixed(1) + ' Н'; $('vF').className = S.F > 8 ? 'bad' : '';
+  $('vTin').textContent = S.Tin.toFixed(1) + ' °C'; $('vTin').className = S.Tin >= 30 ? 'bad' : '';
+  $('vS1').textContent = deg(S.s1.th) + ' / ' + S.s1.tau.toFixed(3);
+  $('vS2').textContent = deg(S.s2.th) + ' / ' + S.s2.tau.toFixed(3);
+  $('vY').textContent = (G.r * S.s2.th * 1000).toFixed(1) + ' мм';
+  $('vPk').textContent = S.torn ? 'снята' : S.pierced ? 'проколота' : 'цела';
+  $('vCyc').textContent = S.stage >= 0 ? S.cycleT.toFixed(1) + ' с' : S.lastT ? S.lastT.toFixed(1) + ' с' : '—';
+  $('vIb').textContent = (S.Ibat * 1000).toFixed(0) + ' мА';
+  $('vMah').textContent = S.lastMAh ? S.lastMAh.toFixed(2) + ' мА·ч' : '—';
+  $('vCycN').textContent = S.lastMAh ? '≈ ' + Math.round(3400 * 0.8 / S.lastMAh) : '—';
+  lis.forEach((li, k) => {
+    const on = S.stage === k, done = S.stage > k;
+    li.className = on ? 'on' : done ? 'done' : '';
+    li.firstElementChild.textContent = on ? '▶' : done ? '✔' : '○';
+    li.querySelector('i').style.width = on ? Math.min(100, S.t / STAGES[k].T * 100) + '%' : done ? '100%' : '0';
+  });
+  let msg, led = '#888', bad = false;
+  if (S.fault) { msg = S.fault; led = '#d3281c'; bad = true; }
+  else if (S.stage >= 0) { msg = 'Идёт цикл: ' + STAGES[S.stage].n; led = '#e6a300'; }
+  else if (ledBlink > 0) { msg = 'Цикл завершён. Продукт отделён.'; led = Math.floor(ledBlink * 4) % 2 ? '#2fc24f' : '#1a5a2a'; }
+  else if (note) { msg = note; led = S.obj ? '#2fc24f' : '#888'; }
+  else if (!S.obj) { msg = 'Готов. Положите батончик.'; led = '#2fc24f'; }
+  else { msg = 'Готов к запуску. Нажмите «Старт».'; led = '#2fc24f'; }
+  if (S.stage >= 0 || ledBlink > 0) note = '';
+  $('msg').textContent = msg; $('msg').className = bad ? 'bad' : '';
+  $('ledDot').style.background = led;
+  $('ledDot').style.boxShadow = led === '#888' ? 'none' : `0 0 8px ${led}`;
+  banner.style.display = (S.fault || S.stage >= 0) ? 'block' : 'none';
+  banner.className = S.fault ? 'bad' : '';
+  banner.textContent = S.fault ? S.fault : STAGES[Math.max(0, S.stage)].n;
+  $('bStart').disabled = S.stage >= 0;
+  $('stT').textContent = 't = ' + S.time.toFixed(1) + ' с';
+  $('stMsg').textContent = S.fault ? 'Ошибка' : S.stage >= 0 ? 'Выполняется' : 'Готово';
+  tz();
 }
-addEventListener('resize', resize); resize();
-requestAnimationFrame(frame);
+function resize() {
+  const w = vp.clientWidth, h = vp.clientHeight;
+  if (!w || !h) return;
+  renderer.setSize(w, h, false); camera.aspect = w / h; camera.fov = w < h ? 48 : 32; camera.updateProjectionMatrix();
+}
+new ResizeObserver(resize).observe(vp); resize();
+tz(); requestAnimationFrame(frame);
 </script>
 </body>
 </html>
