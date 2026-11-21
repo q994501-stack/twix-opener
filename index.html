@@ -3,143 +3,30 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Twix-opener — Сборка правая часть</title>
+<title>Twix-opener — интерактивная 3D-модель</title>
 <style>
-:root{--bg:#f0f0f0;--pane:#f8f8f8;--h1:#f4f7fc;--h2:#d3e0f2;--bd:#8fa5c3;--ln:#c9d2de;--tx:#1b1b1b;--mut:#5b6572;--sel:#cfe3fb;--ok:#1d8a3c;--bad:#c4281c}
 *{box-sizing:border-box}
 html,body{height:100%;margin:0}
-body{font:12px/1.35 "Segoe UI",Tahoma,Arial,sans-serif;color:var(--tx);background:var(--bg);overflow:hidden}
-#app{display:grid;grid-template-rows:auto auto 1fr auto;height:100%}
-#titlebar{background:linear-gradient(#fdfefe,#dfe8f4);border-bottom:1px solid var(--bd);padding:4px 10px;font-weight:600}
-#titlebar span{font-weight:400;color:var(--mut);margin-left:8px}
-#toolbar{display:flex;flex-wrap:wrap;gap:3px 4px;padding:4px 6px;background:var(--bg);border-bottom:1px solid var(--ln);align-items:center}
-.sep{width:1px;height:20px;background:var(--ln);margin:0 4px}
-button,select{font:inherit;color:var(--tx)}
-.tb{padding:3px 8px;border:1px solid transparent;border-radius:3px;background:transparent;cursor:pointer}
-.tb:hover{background:#e3edf9;border-color:var(--bd)}
-.tb[aria-pressed=true]{background:var(--sel);border-color:#6f92c4}
-.tb:focus-visible,.btn:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #1d6fd1;outline-offset:1px}
-select{padding:2px 4px;border:1px solid var(--bd);border-radius:3px;background:#fff}
-#main{display:grid;grid-template-columns:230px 1fr 340px;min-height:0}
-.pane{background:var(--pane);overflow:auto;min-height:0}
-#tree{border-right:1px solid var(--bd);display:flex;flex-direction:column}
-#side{border-left:1px solid var(--bd)}
-.ph{background:linear-gradient(var(--h1),var(--h2));border-bottom:1px solid var(--bd);padding:3px 8px;font-weight:600;position:sticky;top:0;z-index:2}
-#treeBody{flex:1;overflow:auto;padding:2px 0}
-.tr{display:flex;align-items:center;gap:6px;padding:2px 8px;white-space:nowrap}
-.tr:hover{background:#e8f0fb}
-.tr.sel{background:var(--sel)}
-.tr.hov{background:#e8f0fb;outline:1px solid #9db9e0;outline-offset:-1px}
-.tr .sw{width:11px;height:11px;border:1px solid #555;flex:none}
-.tr label{flex:1;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
-.grp{padding:3px 8px;font-weight:600;color:#33415a}
-#props{border-top:1px solid var(--bd);padding:6px 8px;min-height:120px;background:#fff;font-size:11.5px}
-#props b{display:block;margin-bottom:2px;font-size:12px}
-#props p{margin:2px 0;color:var(--mut)}
-#vp{position:relative;min-height:0;background:linear-gradient(#5a5a5a,#363636)}
-canvas#view{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
-#note{position:absolute;left:8px;bottom:6px;color:#d6d6d6;font-size:11px;pointer-events:none;text-shadow:0 1px 2px #000}
-#banner{position:absolute;left:50%;top:10px;transform:translateX(-50%);padding:5px 14px;border-radius:3px;background:rgba(20,20,20,.78);color:#fff;font-weight:600;display:none;pointer-events:none;text-align:center}
-#banner.bad{background:rgba(190,30,20,.92)}
-section{border-bottom:1px solid var(--ln)}
-section>.bd{padding:7px 9px}
-.btns{display:flex;gap:6px;flex-wrap:wrap}
-.btn{padding:5px 12px;border:1px solid #6f87a8;border-radius:3px;background:linear-gradient(#fff,#e1e8f2);cursor:pointer;font-weight:600}
-.btn:hover{background:linear-gradient(#fff,#d4e2f5)}
-.btn.go{background:linear-gradient(#5fb36d,#2f8a42);color:#fff;border-color:#256d34}
-.btn[disabled]{opacity:.5;cursor:not-allowed}
-.row{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:5px 0}
-.row output{font-weight:600;min-width:52px;text-align:right}
-input[type=range]{width:100%;margin:0 0 4px}
-.led{display:flex;align-items:center;gap:8px;margin:8px 0 2px}
-#ledDot{width:16px;height:16px;border-radius:50%;background:#888;border:1px solid #333;flex:none}
-#msg{font-weight:600}
-ol.st{list-style:none;margin:0 0 4px;padding:0}
-ol.st li{display:grid;grid-template-columns:18px 1fr 60px;align-items:center;gap:6px;padding:2px 0;color:var(--mut)}
-ol.st li.on{color:var(--tx);font-weight:600}
-ol.st li.done{color:var(--ok)}
-.bar{height:6px;background:#dde3ec;border-radius:3px;overflow:hidden}
-.bar i{display:block;height:100%;width:0;background:#3d7fd6}
-table{width:100%;border-collapse:collapse}
-td{padding:2px 0;border-bottom:1px dotted var(--ln);vertical-align:top}
-td:last-child{text-align:right;font-weight:600;white-space:nowrap;padding-left:8px}
-td small{display:block;color:var(--mut);font-weight:400;white-space:normal}
-.good{color:var(--ok)}.bad{color:var(--bad)}
-#status{display:flex;gap:18px;padding:2px 10px;background:linear-gradient(#f3f6fb,#dbe4f1);border-top:1px solid var(--bd);white-space:nowrap;overflow:hidden}
-#status span:nth-child(2){flex:1;overflow:hidden;text-overflow:ellipsis}
-#tip{position:fixed;pointer-events:none;background:#ffffe1;border:1px solid #333;padding:2px 6px;font-size:11.5px;display:none;z-index:9}
+body{font:14px/1.4 "Segoe UI",Tahoma,Arial,sans-serif;color:#e8e8e8;background:linear-gradient(#5a5a5a,#363636);overflow:hidden}
+canvas#view{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+#bar{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);display:flex;align-items:center;gap:14px;padding:8px 10px 8px 16px;background:rgba(25,25,25,.72);border:1px solid rgba(255,255,255,.12);border-radius:6px}
+#lab{min-width:170px}
+#lab.bad{color:#ff8a80}
+#btn{font:inherit;font-weight:600;padding:7px 18px;border:1px solid #6f87a8;border-radius:4px;background:linear-gradient(#fff,#dde5f0);color:#1b1b1b;cursor:pointer}
+#btn:hover{background:linear-gradient(#fff,#cddcf0)}
+#btn[aria-pressed=true]{background:linear-gradient(#e0574a,#b8281c);border-color:#8e1d14;color:#fff}
+#btn:focus-visible{outline:2px solid #6fb1ff;outline-offset:2px}
+#hint{position:fixed;left:12px;bottom:8px;font-size:12px;color:#bdbdbd;text-shadow:0 1px 2px #000;pointer-events:none}
 #load{position:fixed;inset:0;display:grid;place-items:center;background:#3b3b3b;color:#ddd;z-index:20;transition:opacity .3s}
-@media (max-width:900px){
- body{overflow:auto}
- #app{display:block;height:auto}
- #main{display:flex;flex-direction:column}
- #vp{height:56vh;order:1}
- #side{order:2;border-left:0;overflow:visible}
- #tree{order:3;border-right:0}
- #treeBody{max-height:300px}
-}
+@media (max-width:600px){#hint{display:none}#bar{width:calc(100% - 24px);justify-content:space-between}}
 </style>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
 <script src="model-data.js"></script>
 </head>
 <body>
-<div id="app">
-  <div id="titlebar">Twix-opener — Сборка_правая_часть<span>просмотр сборки и испытание по ТЗ</span></div>
-  <div id="toolbar" role="toolbar" aria-label="Панель вида">
-    <button class="tb" data-view="iso">Изометрия</button><button class="tb" data-view="front">Спереди</button><button class="tb" data-view="back">Сзади</button>
-    <button class="tb" data-view="top">Сверху</button><button class="tb" data-view="left">Слева</button><button class="tb" data-view="right">Справа</button>
-    <span class="sep"></span>
-    <button class="tb" data-shade="shade" aria-pressed="true">Полутоновое</button><button class="tb" data-shade="edges" aria-pressed="false">С рёбрами</button><button class="tb" data-shade="wire" aria-pressed="false">Каркас</button>
-    <span class="sep"></span>
-    <button class="tb" id="bEx" aria-pressed="false">Разнести</button>
-    <button class="tb" id="bSnd" aria-pressed="false">Звук</button>
-    <label>Время: <select id="ts"><option value="1">1×</option><option value="0.25">¼×</option><option value="0.05">1/20×</option></select></label>
-  </div>
-  <div id="main">
-    <aside id="tree" class="pane">
-      <div class="ph">Дерево модели</div>
-      <div id="treeBody"></div>
-      <div id="props"><b>Свойства</b><p>Выберите деталь в дереве или на модели.</p></div>
-    </aside>
-    <div id="vp"><canvas id="view"></canvas><div id="banner"></div><div id="note">ЛКМ — вращение · ПКМ — сдвиг · колесо — масштаб</div></div>
-    <aside id="side" class="pane">
-      <section><div class="ph">Испытание цикла</div><div class="bd">
-        <div class="btns">
-          <button class="btn go" id="bStart">Старт</button>
-          <button class="btn" id="bReset">Сброс</button>
-          <button class="btn" id="bAuto">Автотест ×5</button>
-        </div>
-        <div class="row"><label><input type="checkbox" id="cObj"> Батончик в устройстве</label><span style="color:var(--mut)">TCRT5000</span></div>
-        <div class="row"><label for="rW">Прочность упаковки</label><output id="oW">8 Н</output></div>
-        <input id="rW" type="range" min="2" max="30" step="1" value="8">
-        <div class="row"><label for="rT">Температура в помещении</label><output id="oT">22 °C</output></div>
-        <input id="rT" type="range" min="15" max="40" step="1" value="22">
-        <div class="led"><span id="ledDot"></span><span id="msg">Готов. Положите батончик.</span></div>
-      </div></section>
-      <section><div class="ph">Этапы цикла</div><div class="bd">
-        <ol class="st" id="stages"></ol>
-        <table><tr><td>Время цикла</td><td id="vCyc">—</td></tr></table>
-      </div></section>
-      <section><div class="ph">Датчики и приводы</div><div class="bd"><table>
-        <tr><td>Датчик объекта TCRT5000</td><td id="vObj">нет</td></tr>
-        <tr><td>Усилие захвата<small>предел для батончика ≈ 8 Н</small></td><td id="vF">0.0 Н</td></tr>
-        <tr><td>Температура внутри</td><td id="vTin">22.0 °C</td></tr>
-        <tr><td>Серво №1 (захват): угол / момент, Н·м</td><td id="vS1">0° / 0.000</td></tr>
-        <tr><td>Серво №2 (рейка): угол / момент, Н·м</td><td id="vS2">0° / 0.000</td></tr>
-        <tr><td>Ход рейки</td><td id="vY">0.0 мм</td></tr>
-        <tr><td>Упаковка</td><td id="vPk">цела</td></tr>
-      </table></div></section>
-      <section><div class="ph">Питание (2×18650, 2S)</div><div class="bd"><table>
-        <tr><td>Ток аккумулятора</td><td id="vIb">0 мА</td></tr>
-        <tr><td>Расход за последний цикл</td><td id="vMah">—</td></tr>
-        <tr><td>Хватит циклов на заряд</td><td id="vCycN">—</td></tr>
-      </table></div></section>
-      <section><div class="ph">Соответствие ТЗ</div><div class="bd"><table id="tz"></table></div></section>
-    </aside>
-  </div>
-  <div id="status"><span id="stMsg">Готово</span><span id="stPart"></span><span id="stT">t = 0.0 с</span></div>
-</div>
-<div id="tip"></div>
+<canvas id="view"></canvas>
+<div id="bar"><span id="lab">Выключено</span><button id="btn" aria-pressed="false">Включить</button></div>
+<div id="hint">ЛКМ — вращение · ПКМ — сдвиг · колесо — масштаб · Пробел — вкл/выкл</div>
 <div id="load">Загрузка модели…</div>
 
 <script type="module">
@@ -242,7 +129,7 @@ function step(dt) {
 /*ENDPHYS*/
 
 /* ============ СЦЕНА ============ */
-const canvas = document.getElementById('view'), vp = document.getElementById('vp');
+const canvas = document.getElementById('view'), vp = document.body;
 let renderer;
 try { renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true }); }
 catch (e) { document.getElementById('load').textContent = 'WebGL недоступен в этом браузере.'; throw e; }
@@ -319,213 +206,56 @@ for (const m of meta) {
   if (m.i === 8) rack = rec;
 }
 
-/* ============ ДЕРЕВО, СВОЙСТВА, ПОДСКАЗКИ ============ */
-const $ = id => document.getElementById(id);
-const rowsOf = new Map(); let selected = null, hover = null;
-const massOf = p => (p.m.i === 3 || p.m.i === 6) ? 13.4 : p.m.vol * 1.24;
-const tb = $('treeBody');
-function addGroup(t) { const d = document.createElement('div'); d.className = 'grp'; d.textContent = t; tb.appendChild(d); }
-function addRow(p) {
-  const d = document.createElement('div'); d.className = 'tr';
-  const c = p.m.col.map(v => Math.round(v * 255));
-  d.innerHTML = `<span class="sw" style="background:rgb(${c})"></span><input type="checkbox" checked aria-label="Показать"><label>${p.name}</label>`;
-  d.querySelector('input').addEventListener('change', e => { p.wrap.visible = e.target.checked; });
-  d.addEventListener('click', e => { if (e.target.tagName !== 'INPUT') select(p); });
-  d.addEventListener('mouseenter', () => setHover(p)); d.addEventListener('mouseleave', () => setHover(null));
-  tb.appendChild(d); rowsOf.set(p, d);
-}
-addGroup('Сборка'); parts.filter(p => p.m.i <= 8).forEach(addRow);
-addGroup('Узлы роликов'); parts.filter(p => p.m.i >= 9).sort((a, b) => unitOf[a.m.i] - unitOf[b.m.i] || a.m.i - b.m.i).forEach(addRow);
 
-function paint(p) { p.mesh.material.emissive.setHex(p === selected ? 0x1d4f9c : p === hover ? 0x40361a : 0); }
-function select(p) {
-  const old = selected; selected = p;
-  if (old) { paint(old); rowsOf.get(old).classList.remove('sel'); }
-  if (p) {
-    paint(p); const r = rowsOf.get(p); r.classList.add('sel'); r.scrollIntoView({ block: 'nearest' });
-    const c = p.m.bb, sz = [0, 1, 2].map(k => (c[1][k] - c[0][k]).toFixed(1)).join(' × ');
-    $('props').innerHTML = `<b>${p.name}</b><p>${p.desc}</p><p>Габариты: ${sz} мм</p><p>Объём: ${p.m.vol.toFixed(2)} см³</p><p>Масса (оценка): ${massOf(p).toFixed(1)} г</p>`;
-  } else $('props').innerHTML = '<b>Свойства</b><p>Выберите деталь в дереве или на модели.</p>';
-}
-function setHover(p) {
-  if (hover === p) return;
-  const old = hover; hover = p;
-  if (old) { paint(old); rowsOf.get(old).classList.remove('hov'); }
-  if (p) { paint(p); rowsOf.get(p).classList.add('hov'); }
-  $('stPart').textContent = p ? p.name : '';
-}
-const ray = new THREE.Raycaster(), ptr = new THREE.Vector2(), tip = $('tip');
-let px = -1, py = -1, ptrDirty = false, downX = 0, downY = 0;
-canvas.addEventListener('pointermove', e => { px = e.clientX; py = e.clientY; ptrDirty = true; });
-canvas.addEventListener('pointerleave', () => { px = -1; ptrDirty = true; });
-canvas.addEventListener('pointerdown', e => { downX = e.clientX; downY = e.clientY; });
-canvas.addEventListener('pointerup', e => {
-  if (Math.hypot(e.clientX - downX, e.clientY - downY) < 4) { const h = pickAt(e.clientX, e.clientY); select(h === selected ? null : h); }
-});
-function pickAt(x, y) {
-  const r = canvas.getBoundingClientRect();
-  ptr.set((x - r.left) / r.width * 2 - 1, -((y - r.top) / r.height) * 2 + 1);
-  ray.setFromCamera(ptr, camera);
-  const h = ray.intersectObjects(parts.filter(p => p.wrap.visible).map(p => p.mesh), false)[0];
-  return h ? parts.find(p => p.mesh === h.object) : null;
-}
-function doHover() {
-  ptrDirty = false;
-  const p = px >= 0 ? pickAt(px, py) : null; setHover(p);
-  if (p) { tip.textContent = p.name; tip.style.display = 'block'; tip.style.left = px + 14 + 'px'; tip.style.top = py + 16 + 'px'; }
-  else tip.style.display = 'none';
-}
+/* ============ УПРАВЛЕНИЕ ============ */
+const $ = id => document.getElementById(id);
+camera.position.set(1, 0.75, 1.15).normalize().multiplyScalar(24);
+controls.update();
 $('load').style.opacity = 0; setTimeout(() => $('load').remove(), 350);
 
-/* ============ ВИДЫ И РЕЖИМЫ ============ */
-const VIEWS = { iso: [1, 0.75, 1.15], front: [0, 0, 1], back: [0, 0, -1], top: [0, 1, 0.001], left: [-1, 0, 0], right: [1, 0, 0] };
-function setView(k) { camera.position.set(...VIEWS[k]).normalize().multiplyScalar(24); controls.target.set(0, 0, 0); controls.update(); }
-document.querySelectorAll('[data-view]').forEach(b => b.addEventListener('click', () => setView(b.dataset.view)));
-setView('iso');
-function setShade(mode) {
-  document.querySelectorAll('[data-shade]').forEach(b => b.setAttribute('aria-pressed', b.dataset.shade === mode));
-  for (const p of parts) {
-    p.mesh.material.wireframe = mode === 'wire';
-    if (mode === 'edges' && !p.edges) {
-      p.edges = new THREE.LineSegments(new THREE.EdgesGeometry(p.mesh.geometry, 35), new THREE.LineBasicMaterial({ color: 0x101010 }));
-      p.mesh.add(p.edges);
-    }
-    if (p.edges) p.edges.visible = mode === 'edges';
-  }
+let on = false, pause = 0;
+const btn = $('btn'), lab = $('lab');
+function setOn(v) {
+  on = v; pause = 0.5;
+  btn.textContent = v ? 'Выключить' : 'Включить';
+  btn.setAttribute('aria-pressed', v);
+  if (!v) { const c1 = S.cmd1, c2 = S.cmd2; resetAll(); S.cmd1 = c1; S.cmd2 = c2; S.obj = false; }
 }
-document.querySelectorAll('[data-shade]').forEach(b => b.addEventListener('click', () => setShade(b.dataset.shade)));
-const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-let ex = 0, exT = 0, timeScale = 1, soundOn = false, au = null;
-$('bEx').addEventListener('click', e => { const v = e.currentTarget.getAttribute('aria-pressed') !== 'true'; e.currentTarget.setAttribute('aria-pressed', v); exT = v ? 1 : 0; if (reduce) ex = exT; });
-$('bSnd').addEventListener('click', e => { soundOn = e.currentTarget.getAttribute('aria-pressed') !== 'true'; e.currentTarget.setAttribute('aria-pressed', soundOn); if (soundOn) audio(); });
-$('ts').addEventListener('change', e => timeScale = +e.target.value);
-function audio() { if (!au) au = new (window.AudioContext || window.webkitAudioContext)(); au.resume(); }
-function beep(f, d, t0) {
-  if (!au) return;
-  const o = au.createOscillator(), g = au.createGain(), t = au.currentTime + t0;
-  o.frequency.value = f; g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.12, t + 0.01);
-  g.gain.exponentialRampToValueAtTime(0.0001, t + d); o.connect(g); g.connect(au.destination); o.start(t); o.stop(t + d + 0.02);
-}
+btn.addEventListener('click', () => setOn(!on));
+addEventListener('keydown', e => { if (e.code === 'Space' && !e.target.closest('button')) { e.preventDefault(); setOn(!on); } });
 
-/* ============ УПРАВЛЕНИЕ ИСПЫТАНИЕМ ============ */
-let auto = 0, autoWait = 0, runs = [], note = '';
-const cObj = $('cObj'), bAuto = $('bAuto');
-const autoOff = () => { auto = 0; bAuto.textContent = 'Автотест ×5'; };
-cObj.addEventListener('change', () => S.obj = cObj.checked);
-$('rW').addEventListener('input', e => { S.Ftear = +e.target.value; $('oW').textContent = e.target.value + ' Н'; });
-$('rT').addEventListener('input', e => { S.env = +e.target.value; $('oT').textContent = e.target.value + ' °C'; });
-$('bStart').addEventListener('click', () => { note = start(); if (!note && soundOn) { audio(); beep(660, 0.08, 0); } });
-$('bReset').addEventListener('click', () => { resetAll(); autoOff(); note = 'Сброс. Механизм возвращается в исходное положение.'; });
-bAuto.addEventListener('click', () => {
-  if (auto > 0) { autoOff(); return; }
-  resetAll(); runs = []; auto = 5; autoWait = 0.6; bAuto.textContent = 'Остановить автотест';
-});
-addEventListener('keydown', e => { if (e.code === 'Space' && !e.target.closest('button,input,select')) { e.preventDefault(); $('bStart').click(); } });
-
-const stageEl = $('stages');
-STAGES.forEach(s => { const li = document.createElement('li'); li.innerHTML = `<span>○</span><span>${s.n}</span><div class="bar"><i></i></div>`; stageEl.appendChild(li); });
-const lis = [...stageEl.children];
-
-const bb = [[1e9, 1e9, 1e9], [-1e9, -1e9, -1e9]];
-for (const m of meta) for (let k = 0; k < 3; k++) { bb[0][k] = Math.min(bb[0][k], m.bb[0][k]); bb[1][k] = Math.max(bb[1][k], m.bb[1][k]); }
-const dims = [0, 1, 2].map(k => bb[1][k] - bb[0][k]);
-const massG = parts.reduce((a, p) => a + massOf(p), 0), battG = 92;
-function tz() {
-  const f = (ok, a, b) => `<td>${a}<small>${b}</small></td><td class="${ok === null ? '' : ok ? 'good' : 'bad'}">${ok === null ? '—' : ok ? '✔' : '✘'}</td>`;
-  const has = S.cycles > 0;
-  const rows = [
-    f(dims[0] <= 250 && dims[1] <= 200 && dims[2] <= 150, `Габариты: ${dims.map(v => v.toFixed(0)).join('×')} мм`, 'правая часть; предел 250×200×150'),
-    f(massG + battG <= 1000, `Масса ≈ ${(massG + battG).toFixed(0)} г`, 'правая часть, PLA 100 % + 2 АКБ; левая не учтена; предел 1 кг'),
-    f(true, 'Питание 2S Li-ion, до 8,4 В', 'предел 12 В; серво через LM2596 на 6 В'),
-    f(null, 'Приводы: 2 серво MG90S', 'в этой части; коллекторных двигателей нет'),
-    f(has ? S.lastT <= 30 : null, `Время цикла: ${has ? S.lastT.toFixed(1) + ' с' : '—'}`, 'предел 30 с, оптимум до 15 с'),
-    f(has ? S.lastPeak <= 8 : null, `Пик усилия захвата: ${has ? S.lastPeak.toFixed(1) + ' Н' : '—'}`, 'для деформации не более 1–2 мм'),
-    f(S.ok >= 5 ? true : (S.fault ? false : null), `Успешных циклов: ${S.ok}`, 'нужно не менее 5 без подстройки')
-  ];
-  $('tz').innerHTML = rows.map(r => `<tr>${r}</tr>`).join('');
-}
-
-/* ============ ЦИКЛ ОТРИСОВКИ ============ */
-const banner = $('banner');
-let last = performance.now(), acc = 0, hudT = 1, ledBlink = 0;
+let last = performance.now(), acc = 0, hudT = 1;
 const H = 1 / 4000;
 function frame(t) {
   const dt = Math.min(0.05, (t - last) / 1000); last = t;
-  acc += dt * timeScale;
-  while (acc >= H) { step(H); acc -= H; }
 
-  if (S.justFinished) {
-    S.justFinished = false; ledBlink = 2.5; cObj.checked = false;
-    if (soundOn) { beep(880, 0.15, 0); beep(1175, 0.2, 0.2); }
-    if (auto > 0) {
-      runs.push(S.lastT); auto--; autoWait = 0.8;
-      if (!auto) { autoOff(); note = `Автотест завершён: ${runs.length} цикла, среднее ${(runs.reduce((a, b) => a + b, 0) / runs.length).toFixed(1)} с.`; }
-    }
+  if (on && S.stage < 0 && !S.fault && (pause -= dt) <= 0) { S.obj = true; start(); pause = 0.8; }
+  if (!on && S.stage < 0) {               // после выключения плавно возвращаем серво в нулевое положение
+    const r = 1.5 * dt;
+    S.cmd1 -= clamp(S.cmd1, -r, r); S.cmd2 -= clamp(S.cmd2, -r, r);
   }
-  if (auto > 0 && S.stage < 0) {
-    if (S.fault) autoOff();
-    else if ((autoWait -= dt) <= 0) { S.obj = true; cObj.checked = true; note = start(); if (note) autoOff(); }
-  }
-  if (ledBlink > 0) ledBlink -= dt;
+  acc += dt;
+  while (acc >= H) { step(H); acc -= H; }
 
   horn.pivot.rotation.x = S.s1.th;
   gear.pivot.rotation.z = S.s2.th;
   rack.pivot.position.y = G.r * S.s2.th * 1000;
-  if (!reduce) ex += (exT - ex) * (1 - Math.exp(-dt * 6));
-  if (Math.abs(exT - ex) < 0.001) ex = exT;
-  for (const p of parts) p.wrap.position.set(p.off[0] * ex, p.off[1] * ex, p.off[2] * ex);
 
-  if (ptrDirty) doHover();
   controls.update();
   renderer.render(scene, camera);
-  if ((hudT += dt) > 0.1) { hudT = 0; hud(); }
+  if ((hudT += dt) > 0.1) {
+    hudT = 0;
+    lab.className = S.fault ? 'bad' : '';
+    lab.textContent = S.fault ? S.fault : S.stage >= 0 ? STAGES[S.stage].n + ' · цикл ' + (S.cycles + 1) : on ? 'Ожидание цикла · готово ' + S.cycles : 'Выключено';
+  }
   requestAnimationFrame(frame);
 }
-function hud() {
-  const deg = r => (r * 180 / Math.PI).toFixed(0) + '°';
-  $('vObj').textContent = S.obj ? 'есть' : 'нет';
-  $('vF').textContent = S.F.toFixed(1) + ' Н'; $('vF').className = S.F > 8 ? 'bad' : '';
-  $('vTin').textContent = S.Tin.toFixed(1) + ' °C'; $('vTin').className = S.Tin >= 30 ? 'bad' : '';
-  $('vS1').textContent = deg(S.s1.th) + ' / ' + S.s1.tau.toFixed(3);
-  $('vS2').textContent = deg(S.s2.th) + ' / ' + S.s2.tau.toFixed(3);
-  $('vY').textContent = (G.r * S.s2.th * 1000).toFixed(1) + ' мм';
-  $('vPk').textContent = S.torn ? 'снята' : S.pierced ? 'проколота' : 'цела';
-  $('vCyc').textContent = S.stage >= 0 ? S.cycleT.toFixed(1) + ' с' : S.lastT ? S.lastT.toFixed(1) + ' с' : '—';
-  $('vIb').textContent = (S.Ibat * 1000).toFixed(0) + ' мА';
-  $('vMah').textContent = S.lastMAh ? S.lastMAh.toFixed(2) + ' мА·ч' : '—';
-  $('vCycN').textContent = S.lastMAh ? '≈ ' + Math.round(3400 * 0.8 / S.lastMAh) : '—';
-  lis.forEach((li, k) => {
-    const on = S.stage === k, done = S.stage > k;
-    li.className = on ? 'on' : done ? 'done' : '';
-    li.firstElementChild.textContent = on ? '▶' : done ? '✔' : '○';
-    li.querySelector('i').style.width = on ? Math.min(100, S.t / STAGES[k].T * 100) + '%' : done ? '100%' : '0';
-  });
-  let msg, led = '#888', bad = false;
-  if (S.fault) { msg = S.fault; led = '#d3281c'; bad = true; }
-  else if (S.stage >= 0) { msg = 'Идёт цикл: ' + STAGES[S.stage].n; led = '#e6a300'; }
-  else if (ledBlink > 0) { msg = 'Цикл завершён. Продукт отделён.'; led = Math.floor(ledBlink * 4) % 2 ? '#2fc24f' : '#1a5a2a'; }
-  else if (note) { msg = note; led = S.obj ? '#2fc24f' : '#888'; }
-  else if (!S.obj) { msg = 'Готов. Положите батончик.'; led = '#2fc24f'; }
-  else { msg = 'Готов к запуску. Нажмите «Старт».'; led = '#2fc24f'; }
-  if (S.stage >= 0 || ledBlink > 0) note = '';
-  $('msg').textContent = msg; $('msg').className = bad ? 'bad' : '';
-  $('ledDot').style.background = led;
-  $('ledDot').style.boxShadow = led === '#888' ? 'none' : `0 0 8px ${led}`;
-  banner.style.display = (S.fault || S.stage >= 0) ? 'block' : 'none';
-  banner.className = S.fault ? 'bad' : '';
-  banner.textContent = S.fault ? S.fault : STAGES[Math.max(0, S.stage)].n;
-  $('bStart').disabled = S.stage >= 0;
-  $('stT').textContent = 't = ' + S.time.toFixed(1) + ' с';
-  $('stMsg').textContent = S.fault ? 'Ошибка' : S.stage >= 0 ? 'Выполняется' : 'Готово';
-  tz();
-}
 function resize() {
-  const w = vp.clientWidth, h = vp.clientHeight;
-  if (!w || !h) return;
+  const w = innerWidth, h = innerHeight;
   renderer.setSize(w, h, false); camera.aspect = w / h; camera.fov = w < h ? 48 : 32; camera.updateProjectionMatrix();
 }
-new ResizeObserver(resize).observe(vp); resize();
-tz(); requestAnimationFrame(frame);
+addEventListener('resize', resize); resize();
+requestAnimationFrame(frame);
 </script>
 </body>
 </html>
