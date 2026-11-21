@@ -3,30 +3,103 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Twix-opener — интерактивная 3D-модель</title>
+<title>Twix-opener — интерактивная 3D-модель привода</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box}
 html,body{height:100%;margin:0}
-body{font:14px/1.4 "Segoe UI",Tahoma,Arial,sans-serif;color:#e8e8e8;background:linear-gradient(#5a5a5a,#363636);overflow:hidden}
+:root{--ink:#1d2830;--muted:#5c6b76;--panel:rgba(251,252,253,.88);--line:rgba(29,40,48,.14);--gold:#c98a14;--red:#c43a2b}
+body{font:400 14px/1.4 Manrope,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink);background:linear-gradient(#5a5a5a,#363636);overflow:hidden;font-variant-numeric:tabular-nums}
 canvas#view{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
-#bar{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);display:flex;align-items:center;gap:14px;padding:8px 10px 8px 16px;background:rgba(25,25,25,.72);border:1px solid rgba(255,255,255,.12);border-radius:6px}
-#lab{min-width:170px}
-#lab.bad{color:#ff8a80}
-#btn{font:inherit;font-weight:600;padding:7px 18px;border:1px solid #6f87a8;border-radius:4px;background:linear-gradient(#fff,#dde5f0);color:#1b1b1b;cursor:pointer}
-#btn:hover{background:linear-gradient(#fff,#cddcf0)}
-#btn[aria-pressed=true]{background:linear-gradient(#e0574a,#b8281c);border-color:#8e1d14;color:#fff}
-#btn:focus-visible{outline:2px solid #6fb1ff;outline-offset:2px}
-#hint{position:fixed;left:12px;bottom:8px;font-size:12px;color:#bdbdbd;text-shadow:0 1px 2px #000;pointer-events:none}
-#load{position:fixed;inset:0;display:grid;place-items:center;background:#3b3b3b;color:#ddd;z-index:20;transition:opacity .3s}
-@media (max-width:600px){#hint{display:none}#bar{width:calc(100% - 24px);justify-content:space-between}}
+.card{background:var(--panel);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+header{position:fixed;left:20px;top:18px;max-width:360px;color:#f2f2f2;text-shadow:0 1px 3px rgba(0,0,0,.5)}
+header h1{margin:0;font-size:22px;font-weight:800;letter-spacing:-.01em}
+header p{margin:4px 0 0;color:#d2d2d2}
+#hud{position:fixed;left:20px;bottom:20px;width:316px}
+#hud .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px}
+.m b{display:block;font-size:24px;font-weight:800;line-height:1.1}
+.m span{color:var(--muted);font-size:12px}
+canvas#scope{width:100%;height:84px;display:block;margin-top:12px;border-top:1px solid var(--line);padding-top:8px}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--muted);margin-top:2px}
+.legend i{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:5px}
+#ctl{position:fixed;right:20px;bottom:20px;width:304px;display:flex;flex-direction:column;gap:14px}
+.power{display:flex;align-items:center;gap:14px}
+#sw{all:unset;cursor:pointer;width:72px;height:38px;border-radius:19px;background:#9aa6ae;position:relative;transition:background .25s;flex:none}
+#sw::after{content:"";position:absolute;left:4px;top:4px;width:30px;height:30px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.35);transition:transform .25s cubic-bezier(.3,1.4,.5,1)}
+#sw[aria-checked=true]{background:var(--red)}
+#sw[aria-checked=true]::after{transform:translateX(34px)}
+#sw:focus-visible,button.t:focus-visible,input:focus-visible{outline:3px solid #1d6fd1;outline-offset:2px}
+.power .tx strong{display:block;font-size:16px}
+.power .tx span{color:var(--muted);font-size:12.5px}
+#status.warn{color:var(--red);font-weight:600}
+.row{display:flex;justify-content:space-between;align-items:baseline;font-size:13px}
+.row output{font-weight:600}
+input[type=range]{width:100%;accent-color:var(--gold);margin:4px 0 10px}
+.btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+button.t{all:unset;box-sizing:border-box;cursor:pointer;text-align:center;padding:8px 6px;border-radius:9px;border:1px solid var(--line);background:rgba(255,255,255,.6);font-weight:600;font-size:13px;transition:background .15s}
+button.t:hover{background:#fff}
+button.t[aria-pressed=true]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.hint{color:var(--muted);font-size:12px;margin:0}
+#tip{position:fixed;pointer-events:none;padding:8px 11px;border-radius:9px;background:var(--ink);color:#fff;font-size:12.5px;max-width:230px;opacity:0;transition:opacity .12s;z-index:5}
+#tip b{display:block;font-size:13.5px}
+#load{position:fixed;inset:0;display:grid;place-items:center;font-weight:600;color:#ddd;background:#3b3b3b;z-index:9;transition:opacity .4s}
+@media (max-width:820px){
+ header{left:14px;top:12px} header h1{font-size:18px} header p{display:none}
+ #hud{left:12px;right:12px;bottom:auto;top:52px;width:auto;padding:10px 12px}
+ #hud .grid{grid-template-columns:repeat(4,1fr);gap:6px} .m b{font-size:17px} .m span{font-size:10.5px}
+ canvas#scope,.legend{display:none}
+ #ctl{left:12px;right:12px;bottom:12px;width:auto;padding:12px;max-height:60vh;overflow:auto}
+}
+@media (prefers-reduced-motion:reduce){#sw,#sw::after{transition:none}}
 </style>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
 <script src="model-data.js"></script>
 </head>
 <body>
 <canvas id="view"></canvas>
-<div id="bar"><span id="lab">Выключено</span><button id="btn" aria-pressed="false">Включить</button></div>
-<div id="hint">ЛКМ — вращение · ПКМ — сдвиг · колесо — масштаб · Пробел — вкл/выкл</div>
+<header><h1>Twix-opener</h1><p>Привод правой части: два сервопривода, шестерня с рейкой и захват. Вращайте сцену мышью, колесо — масштаб.</p></header>
+
+<section id="hud" class="card" aria-label="Показатели">
+  <div class="grid">
+    <div class="m"><b id="vF">0.0</b><span>Усилие захвата, Н</span></div>
+    <div class="m"><b id="vY">0.0</b><span>Ход рейки, мм</span></div>
+    <div class="m"><b id="vTau">0.000</b><span>Момент серво №2, Н·м</span></div>
+    <div class="m"><b id="vI">0</b><span>Ток аккумулятора, мА</span></div>
+  </div>
+  <canvas id="scope"></canvas>
+  <div class="legend"><span><i style="background:#c98a14"></i>ход рейки</span><span><i style="background:#c43a2b"></i>усилие захвата</span></div>
+</section>
+
+<section id="ctl" class="card" aria-label="Управление">
+  <div class="power">
+    <button id="sw" role="switch" aria-checked="false" aria-label="Питание механизма"></button>
+    <div class="tx"><strong id="pw">Выключено</strong><span id="status">Пробел — включить</span></div>
+  </div>
+  <div>
+    <div class="row"><label for="rV">Питание серво</label><output id="oV">6.0 В</output></div>
+    <input id="rV" type="range" min="48" max="60" value="60">
+    <div class="row"><label for="rW">Прочность упаковки</label><output id="oW">8 Н</output></div>
+    <input id="rW" type="range" min="2" max="30" step="1" value="8">
+    <p class="hint">Если упаковка прочнее, чем тянет серво, цикл прервётся перегрузкой.</p>
+  </div>
+  <div class="seg" role="group" aria-label="Скорость времени">
+    <button class="t" data-ts="1" aria-pressed="true">Реальное</button>
+    <button class="t" data-ts="0.25" aria-pressed="false">Замедл. ¼</button>
+    <button class="t" data-ts="0.05" aria-pressed="false">Замедл. 1/20</button>
+  </div>
+  <div class="btns">
+    <button class="t" id="bEx" aria-pressed="false">Разнести детали</button>
+    <button class="t" id="bWf" aria-pressed="false">Каркас</button>
+    <button class="t" id="bSnd" aria-pressed="false">Звук</button>
+    <button class="t" id="bRot" aria-pressed="false">Автовращение</button>
+  </div>
+  <button class="t" id="bCam">Сбросить камеру</button>
+</section>
+
+<div id="tip"></div>
 <div id="load">Загрузка модели…</div>
 
 <script type="module">
@@ -207,47 +280,143 @@ for (const m of meta) {
 }
 
 
+
 /* ============ УПРАВЛЕНИЕ ============ */
 const $ = id => document.getElementById(id);
-camera.position.set(1, 0.75, 1.15).normalize().multiplyScalar(24);
-controls.update();
-$('load').style.opacity = 0; setTimeout(() => $('load').remove(), 350);
+const sw = $('sw'), reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const CAM0 = new THREE.Vector3(1, 0.75, 1.15).normalize().multiplyScalar(24);
+camera.position.copy(CAM0); controls.autoRotateSpeed = 1.2; controls.update();
+$('load').style.opacity = 0; setTimeout(() => $('load').remove(), 450);
 
-let on = false, pause = 0;
-const btn = $('btn'), lab = $('lab');
+let on = false, pause = 0, timeScale = 1, exT = 0, ex = 0, soundOn = false, au = null;
 function setOn(v) {
-  on = v; pause = 0.5;
-  btn.textContent = v ? 'Выключить' : 'Включить';
-  btn.setAttribute('aria-pressed', v);
+  on = v; pause = 0.5; sw.setAttribute('aria-checked', v);
   if (!v) { const c1 = S.cmd1, c2 = S.cmd2; resetAll(); S.cmd1 = c1; S.cmd2 = c2; S.obj = false; }
+  if (v && soundOn) audioInit();
 }
-btn.addEventListener('click', () => setOn(!on));
-addEventListener('keydown', e => { if (e.code === 'Space' && !e.target.closest('button')) { e.preventDefault(); setOn(!on); } });
+sw.addEventListener('click', () => setOn(!on));
+addEventListener('keydown', e => { if (e.code === 'Space' && !e.target.closest('button,input')) { e.preventDefault(); setOn(!on); } });
+const bind = (id, fn) => { const el = $(id); el.addEventListener('click', () => { const v = el.getAttribute('aria-pressed') !== 'true'; el.setAttribute('aria-pressed', v); fn(v); }); };
+bind('bEx', v => { exT = v ? 1 : 0; if (reduce) ex = exT; });
+bind('bWf', v => parts.forEach(p => p.mesh.material.wireframe = v));
+bind('bSnd', v => { soundOn = v; if (v) audioInit(); });
+bind('bRot', v => controls.autoRotate = v && !reduce);
+$('bCam').addEventListener('click', () => { camera.position.copy(CAM0); controls.target.set(0, 0, 0); controls.update(); });
+$('rV').addEventListener('input', e => {       // MG90S: 4,8 В — 0,176 Н·м и 10,5 рад/с; 6 В — 0,216 Н·м и 13 рад/с
+  const V = e.target.value / 10, k = (V - 4.8) / 1.2;
+  SV.Tmax = 0.176 + 0.04 * k; SV.Wmax = 10.5 + 2.5 * k; $('oV').textContent = V.toFixed(1) + ' В';
+});
+$('rW').addEventListener('input', e => { S.Ftear = +e.target.value; $('oW').textContent = e.target.value + ' Н'; });
+document.querySelectorAll('[data-ts]').forEach(b => b.addEventListener('click', () => {
+  timeScale = +b.dataset.ts;
+  document.querySelectorAll('[data-ts]').forEach(x => x.setAttribute('aria-pressed', x === b));
+}));
 
+function audioInit() {
+  if (!au) {
+    const c = new (window.AudioContext || window.webkitAudioContext)();
+    const o = c.createOscillator(), f = c.createBiquadFilter(), g = c.createGain();
+    o.type = 'sawtooth'; f.type = 'lowpass'; f.frequency.value = 500; g.gain.value = 0;
+    o.connect(f); f.connect(g); g.connect(c.destination); o.start(); au = { c, o, g };
+  }
+  au.c.resume();
+}
+function chime(f, d, t0) {
+  if (!au) return;
+  const o = au.c.createOscillator(), g = au.c.createGain(), t = au.c.currentTime + t0;
+  o.frequency.value = f; g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(0.1, t + 0.01);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + d); o.connect(g); g.connect(au.c.destination); o.start(t); o.stop(t + d + 0.02);
+}
+
+/* подсказка при наведении */
+const ray = new THREE.Raycaster(), ptr = new THREE.Vector2(), tip = $('tip');
+let hover = null, ptrDirty = false, px = -1, py = -1;
+canvas.addEventListener('pointermove', e => { px = e.clientX; py = e.clientY; ptrDirty = true; });
+canvas.addEventListener('pointerleave', () => { px = -1; ptrDirty = true; });
+function pick() {
+  ptrDirty = false;
+  let hit = null;
+  if (px >= 0) {
+    ptr.set(px / innerWidth * 2 - 1, -(py / innerHeight) * 2 + 1);
+    ray.setFromCamera(ptr, camera);
+    const h = ray.intersectObjects(parts.map(p => p.mesh), false)[0];
+    if (h) hit = parts.find(p => p.mesh === h.object);
+  }
+  if (hit !== hover) {
+    if (hover) hover.mesh.material.emissive.setHex(0);
+    hover = hit;
+    if (hover) hover.mesh.material.emissive.setHex(0x40361a);
+  }
+  if (hover) {
+    tip.innerHTML = '<b>' + hover.name + '</b>' + hover.desc + ' Объём ≈ ' + hover.m.vol.toFixed(1) + ' см³.';
+    tip.style.left = Math.min(px + 16, innerWidth - 250) + 'px'; tip.style.top = (py + 16) + 'px'; tip.style.opacity = 1;
+  } else tip.style.opacity = 0;
+}
+
+/* осциллограф */
+const sc = $('scope'), sctx = sc.getContext('2d'), N = 240, hy = [], hf = [];
+function drawScope() {
+  const dpr = Math.min(devicePixelRatio, 2), w = sc.clientWidth, h = sc.clientHeight;
+  if (!w) return;
+  if (sc.width !== Math.round(w * dpr)) { sc.width = Math.round(w * dpr); sc.height = Math.round(h * dpr); }
+  sctx.setTransform(dpr, 0, 0, dpr, 0, 0); sctx.clearRect(0, 0, w, h);
+  sctx.strokeStyle = 'rgba(29,40,48,.18)'; sctx.beginPath(); sctx.moveTo(0, h / 2); sctx.lineTo(w, h / 2); sctx.stroke();
+  const line = (arr, col, f) => {
+    sctx.strokeStyle = col; sctx.lineWidth = 1.8; sctx.beginPath();
+    arr.forEach((v, i) => { const x = i / (N - 1) * w, y = h - 6 - clamp(f(v), 0, 1) * (h - 12); i ? sctx.lineTo(x, y) : sctx.moveTo(x, y); });
+    sctx.stroke();
+  };
+  line(hy, '#c98a14', v => (v + 12) / 24);
+  line(hf, '#c43a2b', v => v / 10);
+}
+
+/* ============ ЦИКЛ ============ */
 let last = performance.now(), acc = 0, hudT = 1;
 const H = 1 / 4000;
 function frame(t) {
   const dt = Math.min(0.05, (t - last) / 1000); last = t;
 
   if (on && S.stage < 0 && !S.fault && (pause -= dt) <= 0) { S.obj = true; start(); pause = 0.8; }
-  if (!on && S.stage < 0) {               // после выключения плавно возвращаем серво в нулевое положение
+  if (!on && S.stage < 0) {              // после выключения плавно возвращаем серво в ноль
     const r = 1.5 * dt;
     S.cmd1 -= clamp(S.cmd1, -r, r); S.cmd2 -= clamp(S.cmd2, -r, r);
   }
-  acc += dt;
+  acc += dt * timeScale;
   while (acc >= H) { step(H); acc -= H; }
+  if (S.justFinished) { S.justFinished = false; if (soundOn) { chime(880, 0.15, 0); chime(1175, 0.2, 0.2); } }
 
   horn.pivot.rotation.x = S.s1.th;
   gear.pivot.rotation.z = S.s2.th;
   rack.pivot.position.y = G.r * S.s2.th * 1000;
+  if (!reduce) ex += (exT - ex) * (1 - Math.exp(-dt * 6));
+  if (Math.abs(exT - ex) < 0.001) ex = exT;
+  for (const p of parts) p.wrap.position.set(p.off[0] * ex, p.off[1] * ex, p.off[2] * ex);
 
+  hy.push(G.r * S.s2.th * 1000); hf.push(S.F);
+  if (hy.length > N) { hy.shift(); hf.shift(); }
+  if (au) {
+    const sp = Math.abs(S.s1.w) + Math.abs(S.s2.w);
+    au.g.gain.setTargetAtTime(soundOn ? Math.min(0.03, sp / 300) : 0, au.c.currentTime, 0.05);
+    au.o.frequency.setTargetAtTime(90 + sp * 8, au.c.currentTime, 0.05);
+  }
+  if (ptrDirty) pick();
   controls.update();
   renderer.render(scene, camera);
   if ((hudT += dt) > 0.1) {
     hudT = 0;
-    lab.className = S.fault ? 'bad' : '';
-    lab.textContent = S.fault ? S.fault : S.stage >= 0 ? STAGES[S.stage].n + ' · цикл ' + (S.cycles + 1) : on ? 'Ожидание цикла · готово ' + S.cycles : 'Выключено';
+    $('vF').textContent = S.F.toFixed(1);
+    $('vY').textContent = (G.r * S.s2.th * 1000).toFixed(1);
+    $('vTau').textContent = S.s2.tau.toFixed(3);
+    $('vI').textContent = (S.Ibat * 1000).toFixed(0);
+    const st = $('status');
+    $('pw').textContent = on ? 'Включено' : 'Выключено';
+    st.classList.toggle('warn', !!S.fault);
+    st.textContent = S.fault ? S.fault + '. Выключите и включите снова.'
+      : S.stage >= 0 ? STAGES[S.stage].n + ' · цикл ' + (S.cycles + 1)
+      : on ? 'Пауза между циклами · готово ' + S.cycles
+      : Math.abs(S.s2.th) + Math.abs(S.s1.th) > 0.02 ? 'Возврат в исходное положение' : 'Пробел — включить';
   }
+  drawScope();
   requestAnimationFrame(frame);
 }
 function resize() {
