@@ -10,13 +10,13 @@
 <style>
 *{box-sizing:border-box}
 html,body{height:100%;margin:0}
-:root{--ink:#1d2830;--muted:#5c6b76;--panel:rgba(251,252,253,.88);--line:rgba(29,40,48,.14);--gold:#c98a14;--red:#c43a2b}
-body{font:400 14px/1.4 Manrope,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink);background:linear-gradient(#5a5a5a,#363636);overflow:hidden;font-variant-numeric:tabular-nums}
+:root{--ink:#1d2830;--muted:#5c6b76;--panel:rgba(251,252,253,.84);--line:rgba(29,40,48,.14);--gold:#c98a14;--red:#c43a2b;--bg1:#e6eaed;--bg2:#bcc7cf}
+body{font:400 14px/1.4 Manrope,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink);background:radial-gradient(120% 90% at 50% 20%,var(--bg1),var(--bg2));overflow:hidden;font-variant-numeric:tabular-nums}
 canvas#view{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
 .card{background:var(--panel);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
-header{position:fixed;left:20px;top:18px;max-width:360px;color:#f2f2f2;text-shadow:0 1px 3px rgba(0,0,0,.5)}
+header{position:fixed;left:20px;top:18px;max-width:360px}
 header h1{margin:0;font-size:22px;font-weight:800;letter-spacing:-.01em}
-header p{margin:4px 0 0;color:#d2d2d2}
+header p{margin:4px 0 0;color:var(--muted)}
 #hud{position:fixed;left:20px;bottom:20px;width:316px}
 #hud .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px}
 .m b{display:block;font-size:24px;font-weight:800;line-height:1.1}
@@ -24,7 +24,7 @@ header p{margin:4px 0 0;color:#d2d2d2}
 canvas#scope{width:100%;height:84px;display:block;margin-top:12px;border-top:1px solid var(--line);padding-top:8px}
 .legend{display:flex;gap:14px;font-size:12px;color:var(--muted);margin-top:2px}
 .legend i{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:5px}
-#ctl{position:fixed;right:20px;bottom:20px;width:304px;display:flex;flex-direction:column;gap:14px}
+#ctl{position:fixed;right:20px;bottom:20px;width:304px;display:flex;flex-direction:column;gap:14px;max-height:calc(100vh - 40px);overflow:auto}
 .power{display:flex;align-items:center;gap:14px}
 #sw{all:unset;cursor:pointer;width:72px;height:38px;border-radius:19px;background:#9aa6ae;position:relative;transition:background .25s;flex:none}
 #sw::after{content:"";position:absolute;left:4px;top:4px;width:30px;height:30px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.35);transition:transform .25s cubic-bezier(.3,1.4,.5,1)}
@@ -45,7 +45,7 @@ button.t[aria-pressed=true]{background:var(--ink);color:#fff;border-color:var(--
 .hint{color:var(--muted);font-size:12px;margin:0}
 #tip{position:fixed;pointer-events:none;padding:8px 11px;border-radius:9px;background:var(--ink);color:#fff;font-size:12.5px;max-width:230px;opacity:0;transition:opacity .12s;z-index:5}
 #tip b{display:block;font-size:13.5px}
-#load{position:fixed;inset:0;display:grid;place-items:center;font-weight:600;color:#ddd;background:#3b3b3b;z-index:9;transition:opacity .4s}
+#load{position:fixed;inset:0;display:grid;place-items:center;font-weight:600;color:var(--muted);background:var(--bg1);z-index:9;transition:opacity .4s}
 @media (max-width:820px){
  header{left:14px;top:12px} header h1{font-size:18px} header p{display:none}
  #hud{left:12px;right:12px;bottom:auto;top:52px;width:auto;padding:10px 12px}
@@ -85,6 +85,14 @@ button.t[aria-pressed=true]{background:var(--ink);color:#fff;border-color:var(--
     <input id="rW" type="range" min="2" max="30" step="1" value="8">
     <p class="hint">Если упаковка прочнее, чем тянет серво, цикл прервётся перегрузкой.</p>
   </div>
+  <div>
+    <div class="row"><label for="rX">Поворот по оси X</label><output id="oX">0°</output></div>
+    <input id="rX" type="range" min="-180" max="180" step="1" value="0">
+    <div class="row"><label for="rY">Поворот по оси Y</label><output id="oY">0°</output></div>
+    <input id="rY" type="range" min="-180" max="180" step="1" value="0">
+    <div class="row"><label for="rZ">Поворот по оси Z</label><output id="oZ">0°</output></div>
+    <input id="rZ" type="range" min="-180" max="180" step="1" value="0" style="margin-bottom:0">
+  </div>
   <div class="seg" role="group" aria-label="Скорость времени">
     <button class="t" data-ts="1" aria-pressed="true">Реальное</button>
     <button class="t" data-ts="0.25" aria-pressed="false">Замедл. ¼</button>
@@ -96,7 +104,7 @@ button.t[aria-pressed=true]{background:var(--ink);color:#fff;border-color:var(--
     <button class="t" id="bSnd" aria-pressed="false">Звук</button>
     <button class="t" id="bRot" aria-pressed="false">Автовращение</button>
   </div>
-  <button class="t" id="bCam">Сбросить камеру</button>
+  <button class="t" id="bCam">Сбросить вид</button>
 </section>
 
 <div id="tip"></div>
@@ -105,6 +113,7 @@ button.t[aria-pressed=true]{background:var(--ink);color:#fff;border-color:var(--
 <script type="module">
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 
 /* ============ ФИЗИКА И АВТОМАТИКА (СИ) ============ */
 /*PHYS*/
@@ -207,19 +216,33 @@ let renderer;
 try { renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true }); }
 catch (e) { document.getElementById('load').textContent = 'WebGL недоступен в этом браузере.'; throw e; }
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(32, 1, 0.1, 500);
-scene.add(camera);
-scene.add(new THREE.AmbientLight(0xffffff, 0.62));
-const key = new THREE.DirectionalLight(0xffffff, 1.05); key.position.set(0.4, 0.8, 1); camera.add(key);
-const fill = new THREE.DirectionalLight(0xffffff, 0.35); fill.position.set(-1, -0.6, 0.5); camera.add(fill);
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+const sun = new THREE.DirectionalLight(0xffffff, 1.6);
+sun.position.set(12, 24, 14); sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048); sun.shadow.bias = -0.0006;
+Object.assign(sun.shadow.camera, { left: -18, right: 18, top: 18, bottom: -18, near: 1, far: 70 });
+scene.add(sun);
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(120, 120), new THREE.ShadowMaterial({ opacity: 0.22 }));
+floor.rotation.x = -Math.PI / 2; floor.receiveShadow = true; scene.add(floor);
+const grid = new THREE.GridHelper(60, 60, 0x7d8b95, 0x9aa6ae);
+grid.material.transparent = true; grid.material.opacity = 0.35; scene.add(grid);
 const controls = new OrbitControls(camera, canvas);
 controls.enableDamping = true; controls.minDistance = 6; controls.maxDistance = 90;
+controls.maxPolarAngle = Math.PI * 0.495;   // пока виден пол; при повороте модели ограничение снимается
 
 // CAD: Z вверх, мм → three: Y вверх, см. Центр сборки в начале координат.
+// model — внешняя группа: через неё модель поворачивается по осям X, Y, Z вокруг центра сборки (центр = начало координат).
+const model = new THREE.Group(); scene.add(model);
 const cad = new THREE.Group();
 cad.rotation.x = -Math.PI / 2; cad.scale.setScalar(0.1); cad.position.set(-1.57, 0, -0.4);
-scene.add(cad);
+model.add(cad);
 
 const MODEL = window.TWIX_MODEL;
 const bin = Uint8Array.from(atob(MODEL.bin), c => c.charCodeAt(0)).buffer;
@@ -267,8 +290,10 @@ for (const m of meta) {
     off = [Math.sign(m.center[0] - w.center[0]) * 14, -34, Math.sign(m.center[2]) * 16];
   }
   const col = new THREE.Color().setRGB(m.col[0], m.col[1], m.col[2], THREE.SRGBColorSpace);
-  const mat = new THREE.MeshPhongMaterial({ color: col, specular: 0x2a2a2a, shininess: 35, side: THREE.DoubleSide });
+  const metal = m.i === 4 || m.i === 7;
+  const mat = new THREE.MeshStandardMaterial({ color: col, metalness: metal ? 0.55 : 0.25, roughness: metal ? 0.35 : 0.5, side: THREE.DoubleSide });
   const mesh = new THREE.Mesh(makeGeometry(m), mat);
+  mesh.castShadow = mesh.receiveShadow = true;
   const wrap = new THREE.Group(), pivot = new THREE.Group();
   if (m.i === 7) { pivot.position.set(m.center[0], m.center[1], 0); mesh.position.set(-m.center[0], -m.center[1], 0); }
   pivot.add(mesh); wrap.add(pivot); cad.add(wrap);
@@ -301,7 +326,21 @@ bind('bEx', v => { exT = v ? 1 : 0; if (reduce) ex = exT; });
 bind('bWf', v => parts.forEach(p => p.mesh.material.wireframe = v));
 bind('bSnd', v => { soundOn = v; if (v) audioInit(); });
 bind('bRot', v => controls.autoRotate = v && !reduce);
-$('bCam').addEventListener('click', () => { camera.position.copy(CAM0); controls.target.set(0, 0, 0); controls.update(); });
+// поворот модели по трём осям
+const AX = ['X', 'Y', 'Z'];
+function applyRot() {
+  const d = AX.map(a => +$('r' + a).value);
+  AX.forEach((a, i) => $('o' + a).textContent = d[i] + '°');
+  model.rotation.set(d[0] * Math.PI / 180, d[1] * Math.PI / 180, d[2] * Math.PI / 180);
+  const rotated = d.some(v => v !== 0);
+  floor.visible = grid.visible = !rotated;               // пол и сетка имеют смысл только у неповёрнутой модели
+  controls.maxPolarAngle = rotated ? Math.PI : Math.PI * 0.495;
+}
+AX.forEach(a => $('r' + a).addEventListener('input', applyRot));
+$('bCam').addEventListener('click', () => {
+  camera.position.copy(CAM0); controls.target.set(0, 0, 0); controls.update();
+  AX.forEach(a => $('r' + a).value = 0); applyRot();
+});
 $('rV').addEventListener('input', e => {       // MG90S: 4,8 В — 0,176 Н·м и 10,5 рад/с; 6 В — 0,216 Н·м и 13 рад/с
   const V = e.target.value / 10, k = (V - 4.8) / 1.2;
   SV.Tmax = 0.176 + 0.04 * k; SV.Wmax = 10.5 + 2.5 * k; $('oV').textContent = V.toFixed(1) + ' В';
@@ -345,7 +384,7 @@ function pick() {
   if (hit !== hover) {
     if (hover) hover.mesh.material.emissive.setHex(0);
     hover = hit;
-    if (hover) hover.mesh.material.emissive.setHex(0x40361a);
+    if (hover) hover.mesh.material.emissive.setHex(0x3a2a08);
   }
   if (hover) {
     tip.innerHTML = '<b>' + hover.name + '</b>' + hover.desc + ' Объём ≈ ' + hover.m.vol.toFixed(1) + ' см³.';
@@ -391,6 +430,7 @@ function frame(t) {
   if (!reduce) ex += (exT - ex) * (1 - Math.exp(-dt * 6));
   if (Math.abs(exT - ex) < 0.001) ex = exT;
   for (const p of parts) p.wrap.position.set(p.off[0] * ex, p.off[1] * ex, p.off[2] * ex);
+  floor.position.y = grid.position.y = -4.5 - 4.6 * ex;
 
   hy.push(G.r * S.s2.th * 1000); hf.push(S.F);
   if (hy.length > N) { hy.shift(); hf.shift(); }
